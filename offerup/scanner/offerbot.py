@@ -1,8 +1,13 @@
+import time
+
 from selenium import webdriver
 from pyOfferUp import fetch
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 
 from offerup.config import Config
+
+ASK_XPATH = '/html/body/div[1]/div[5]/div[2]/main/div[1]/div/div[1]/div/div[3]/div[2]/div[2]'
 
 
 class OfferBot:
@@ -22,6 +27,9 @@ class OfferBot:
             for listing in listings[model]:
                 url = listing["listingUrl"]
                 self.driver.get(url)
+                button = self.driver.find_element(By.XPATH, ASK_XPATH)
+                button.click()
+                time.sleep(1000)
 
     def get_listings(self) -> dict[str, list[dict]]:
         all_listings = {}
