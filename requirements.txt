@@ -1,2 +1,4 @@
 selenium
 pyOfferUp
+azure-cosmos
+python-dotenv

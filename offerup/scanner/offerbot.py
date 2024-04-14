@@ -1,4 +1,5 @@
 import time
+from typing import Optional
 
 from selenium import webdriver
 from pyOfferUp import fetch
@@ -17,14 +18,9 @@ SEND_MSG_XPATH = '/html/body/div[3]/div[3]/div/div[3]/form/button'
 
 class OfferBot:
     """Ask questions and make offers"""
-    def __init__(self, cfg: Config | None = None):
-        self.cfg = cfg or Config.default()  # this needs to be set before we called init chromedriver
-        self.driver = self._init_chromedriver()
-
-    def _init_chromedriver(self):
-        chrome_options = Options()
-        chrome_options.add_argument(self.cfg.chrome_data_path)
-        return webdriver.Chrome(options=chrome_options)
+    def __init__(self, cfg: Optional[Config]):
+        self.cfg = cfg or Config.default()
+        self.driver = _init_chromedriver(self.cfg)
 
     def scan(self):
         listings = self.get_listings()
@@ -33,13 +29,11 @@ class OfferBot:
                 url = listing["listingUrl"]
                 self.driver.get(url)
 
-                ask_btn = self.driver.find_element(By.XPATH, ASK_XPATH)
-                ask_btn.click()
+                self.driver.find_element(By.XPATH, ASK_XPATH).click()
 
-                chat_btn = WebDriverWait(self.driver, 5).until(
+                WebDriverWait(self.driver, 5).until(
                     EC.presence_of_element_located((By.XPATH, CHAT_XPATH))
-                )
-                chat_btn.click()
+                ).click()
 
                 msg_txt = WebDriverWait(self.driver, 5).until(
                     EC.presence_of_element_located((By.XPATH, NEW_MSG_XPATH))
@@ -54,3 +48,9 @@ class OfferBot:
             all_listings[model] = fetch.get_listings(query=model, state=self.cfg.state, city=self.cfg.city,
                                                      limit=self.cfg.listing_limit)
         return all_listings
+
+
+def _init_chromedriver(cfg: Config):
+    chrome_options = Options()
+    chrome_options.add_argument(cfg.chrome_data_path)
+    return webdriver.Chrome(options=chrome_options)
