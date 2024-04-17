@@ -18,7 +18,7 @@ SEND_MSG_XPATH = '/html/body/div[3]/div[3]/div/div[3]/form/button'
 
 class OfferBot:
     """Ask questions and make offers"""
-    def __init__(self, cfg: Optional[Config]):
+    def __init__(self, cfg: Optional[Config] = None):
         self.cfg = cfg or Config.default()
         self.driver = _init_chromedriver(self.cfg)
 

@@ -1,11 +1,17 @@
 from dataclasses import dataclass
 from typing import Self
 import os
+import platform
 
 from pyOfferUp import places
 from dotenv import load_dotenv
 
 places.places_dict['South Carolina']['cities']['Bluffton'] = {'lat': 32.237148, 'lon': -80.860390}
+
+if platform.system() == 'Windows':
+    CHROME_DATA_PATH = f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data"
+else:
+    CHROME_DATA_PATH = f"user-data-dir={os.path.expanduser('~')}/.config/google-chrome/Default"
 
 
 @dataclass
@@ -37,7 +43,7 @@ class Config:
             valid_iphone_models=["iphone 11", "iphone 12", "iphone 13", "iphone 14", "iphone 15"],
             location=("Atlanta", "Georgia"),
             listing_limit=100,
-            chrome_data_path=f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data"
+            chrome_data_path=CHROME_DATA_PATH
         )
 
     @classmethod
@@ -47,7 +53,7 @@ class Config:
             valid_iphone_models=["totallylegit"],
             location=("Bluffton", "South Carolina"),
             listing_limit=10,
-            chrome_data_path=f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data"
+            chrome_data_path=CHROME_DATA_PATH
         )
 
     @property
