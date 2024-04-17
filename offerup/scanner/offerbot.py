@@ -3,6 +3,7 @@ from typing import Optional
 
 from selenium import webdriver
 from pyOfferUp import fetch
+from selenium.common import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -10,6 +11,10 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from offerup.config import Config
 
+# Small window (ask button in footer)
+ASK_XPATH_FOOTER = '/html/body/div[1]/div[5]/footer/div/div[3]/div/div/div[1]'
+
+# Full window
 ASK_XPATH = '/html/body/div[1]/div[5]/div[2]/main/div[1]/div/div[1]/div/div[3]/div[2]/div[2]'
 CHAT_XPATH = '/html/body/div[3]/div[3]/div/div[3]/form/div/div/div[2]/div'
 NEW_MSG_XPATH = '/html/body/div[3]/div[3]/div/div[3]/form/div/div/div[2]/div/textarea'
@@ -29,7 +34,10 @@ class OfferBot:
                 url = listing["listingUrl"]
                 self.driver.get(url)
 
-                self.driver.find_element(By.XPATH, ASK_XPATH).click()
+                try:
+                    self.driver.find_element(By.XPATH, ASK_XPATH).click()
+                except NoSuchElementException:
+                    self.driver.find_element(By.XPATH, ASK_XPATH_FOOTER).click()
 
                 WebDriverWait(self.driver, 5).until(
                     EC.presence_of_element_located((By.XPATH, CHAT_XPATH))
@@ -54,3 +62,8 @@ def _init_chromedriver(cfg: Config):
     chrome_options = Options()
     chrome_options.add_argument(cfg.chrome_data_path)
     return webdriver.Chrome(options=chrome_options)
+
+
+if __name__ == '__main__':
+    bot = OfferBot()
+    bot.scan()

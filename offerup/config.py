@@ -11,7 +11,7 @@ places.places_dict['South Carolina']['cities']['Bluffton'] = {'lat': 32.237148, 
 if platform.system() == 'Windows':
     CHROME_DATA_PATH = f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data"
 else:
-    CHROME_DATA_PATH = f"user-data-dir={os.path.expanduser('~')}/.config/google-chrome/Default"
+    CHROME_DATA_PATH = f"user-data-dir={os.path.expanduser('~')}/.config/google-chrome/'Profile 1'"
 
 
 @dataclass
