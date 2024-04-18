@@ -11,7 +11,7 @@ places.places_dict['South Carolina']['cities']['Bluffton'] = {'lat': 32.237148, 
 if platform.system() == 'Windows':
     CHROME_DATA_PATH = f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data"
 else:
-    CHROME_DATA_PATH = f"user-data-dir={os.path.expanduser('~')}/.config/google-chrome/'Profile 1'"
+    CHROME_DATA_PATH = f"user-data-dir={os.path.expanduser('~')}/.config/google-chrome"
 
 
 @dataclass
@@ -23,7 +23,7 @@ class Config:
     valid_iphone_models: list[str]
     location: tuple[str, str]
     listing_limit: int
-    chrome_data_path: str
+    chrome_data_path = CHROME_DATA_PATH
 
     @classmethod
     def default(cls, load=True, **kwargs) -> Self:
@@ -43,17 +43,15 @@ class Config:
             valid_iphone_models=["iphone 11", "iphone 12", "iphone 13", "iphone 14", "iphone 15"],
             location=("Atlanta", "Georgia"),
             listing_limit=100,
-            chrome_data_path=CHROME_DATA_PATH
         )
 
     @classmethod
     def _test(cls) -> Self:
         print('Using test configuration')
         return cls(
-            valid_iphone_models=["totallylegit"],
-            location=("Bluffton", "South Carolina"),
+            valid_iphone_models=["Gamer Guy Bath water"],
+            location=("Atlanta", "Georgia"),
             listing_limit=10,
-            chrome_data_path=CHROME_DATA_PATH
         )
 
     @property
