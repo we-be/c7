@@ -1,5 +1,4 @@
 import time
-from typing import Optional
 
 from selenium import webdriver
 from pyOfferUp import fetch
@@ -7,9 +6,9 @@ from selenium.common import NoSuchElementException, TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
 
-from offerup.config import Config
+from offerup.config import cfg
 
 # Small window (ask button in footer)
 ASK_XPATH_FOOTER = '/html/body/div[1]/div[5]/footer/div/div[3]/div/div/div[1]'
@@ -27,9 +26,8 @@ SEND_MSG_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/button'
 
 class OfferBot:
     """Ask questions and make offers"""
-    def __init__(self, cfg: Optional[Config] = None):
-        self.cfg = cfg or Config.default()
-        self.driver = _init_chromedriver(self.cfg)
+    def __init__(self):
+        self.driver = _init_chromedriver()
 
     def scan(self):
         listings = self.get_listings()
@@ -47,27 +45,28 @@ class OfferBot:
 
                 try:
                     WebDriverWait(self.driver, 5).until(
-                        EC.presence_of_element_located((By.XPATH, CHAT_XPATH))
+                        ec.presence_of_element_located((By.XPATH, CHAT_XPATH))
                     ).click()
                 except TimeoutException:
                     time.sleep(30)  # TODO CHECK FOR 'inbox' in URL BEFORE THIS OR HERE OR JUST ASSUME AND MESSAGE
 
                 msg_txt = WebDriverWait(self.driver, 5).until(
-                    EC.presence_of_element_located((By.XPATH, NEW_MSG_XPATH))
+                    ec.presence_of_element_located((By.XPATH, NEW_MSG_XPATH))
                 )
                 msg_txt.send_keys('Hello! Is this still available?')
                 self.driver.find_element(By.XPATH, SEND_MSG_XPATH).click()
                 time.sleep(1000)
 
-    def get_listings(self) -> dict[str, list[dict]]:
+    @staticmethod
+    def get_listings() -> dict[str, list[dict]]:
         all_listings = {}
-        for model in self.cfg.valid_iphone_models:
-            all_listings[model] = fetch.get_listings(query=model, state=self.cfg.state, city=self.cfg.city,
-                                                     limit=self.cfg.listing_limit)
+        for model in cfg.valid_iphone_models:
+            all_listings[model] = fetch.get_listings(query=model, state=cfg.state, city=cfg.city,
+                                                     limit=cfg.listing_limit)
         return all_listings
 
 
-def _init_chromedriver(cfg: Config):
+def _init_chromedriver():
     chrome_options = Options()
     chrome_options.add_argument(cfg.chrome_data_path)
     return webdriver.Chrome(options=chrome_options)

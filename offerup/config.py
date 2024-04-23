@@ -27,10 +27,10 @@ class Config:
 
     @classmethod
     def default(cls, load=True, **kwargs) -> Self:
-        cfg = cls._default() if not cls.DEBUG else cls._test()
+        _cfg = cls._default() if not cls.DEBUG else cls._test()
         if load:
-            cfg.load(**kwargs)
-        return cfg
+            _cfg.load(**kwargs)
+        return _cfg
 
     def load(self, **kwargs) -> None:
         """Load the .env file"""
@@ -75,3 +75,6 @@ class Config:
         url = os.getenv("COSMOS_URI")
         key = {"masterKey": os.getenv("COSMOS_KEY")}
         return url, key
+
+
+cfg = Config.default()  # global config
