@@ -1,3 +1,4 @@
+import dataclasses
 from enum import Enum
 from typing import Optional
 from dataclasses import dataclass
@@ -24,6 +25,13 @@ class Message:
     content: MessageContent
 
 
+@dataclass
+class Convo:
+    id: str
+    itemType: str
+    messages: list[Message]
+
+
 class C3:
     """A cosmos conversation container"""
     def __init__(self, db: str, container: str):
@@ -31,10 +39,12 @@ class C3:
         self.db: DatabaseProxy = self.client.get_database_client(db)
         self.container: ContainerProxy = self.db.get_container_client(container)
 
-    def new(self, listing: dict, search_term: str):
-        pass
+    def new(self, convo: Convo):
+        d3 = dataclasses.asdict(convo)
+        self.container.create_item(d3)
 
 
 if __name__ == '__main__':
-    c = C3('conversations', 'offerup')
-    print(c)
+    c1 = C3('conversations', 'offerup')
+    c2 = Convo("test-id", "test item", [])
+    c1.new(c2)
