@@ -36,10 +36,10 @@ class OfferBot:
         for model in listings.keys():
             for listing in listings[model]:
                 # open the listing
-                url = listing["listingUrl"]
-                self.driver.get(url)
+                self.driver.get(listing["listingUrl"])
 
                 # maybe add WebDriverWait here
+                # click the `Ask` button, it could be in the footer if the window is small enough
                 try:
                     elem = self.driver.find_element(By.XPATH, ASK_XPATH)
                 except NoSuchElementException:
@@ -58,10 +58,9 @@ class OfferBot:
 
                 # initiate a new conversation
                 self.driver.find_element(By.XPATH, CHAT_XPATH).click()
-                msg_txt = WebDriverWait(self.driver, 5).until(
+                WebDriverWait(self.driver, 5).until(
                     ec.presence_of_element_located((By.XPATH, NEW_MSG_XPATH))
-                )
-                # msg_txt.send_keys('Hello! Is this still available?')
+                ).send_keys('Hello! Is this still available?')
                 # self.driver.find_element(By.XPATH, SEND_MSG_XPATH).click()
 
                 print('done')
