@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from azure.cosmos import CosmosClient, DatabaseProxy, ContainerProxy
 
-from config import Config, cfg
+from offerup.config import cfg
 
 
 class MessageRole(Enum):
@@ -24,28 +24,17 @@ class Message:
     content: MessageContent
 
 
-class Cosmos:
-    """A cosmos container"""
+class C3:
+    """A cosmos conversation container"""
     def __init__(self, db: str, container: str):
         self.client: CosmosClient = CosmosClient(*cfg.cosmos_creds())
         self.db: DatabaseProxy = self.client.get_database_client(db)
         self.container: ContainerProxy = self.db.get_container_client(container)
 
-
-class Conversation:
-    """Class for storing and retrieving conversation data in Cosmos"""
-    def __init__(self, convo_id: Optional[str] = None):
-        self.cosmos: Cosmos = Cosmos('conversations', 'offerup')
-        self.id: str = convo_id or self.start_convo()
-        self.messages: list[Message] = [] if not convo_id else self.load_messages(convo_id)
-
-    def start_convo(self) -> str:
-        pass
-
-    def load_messages(self, convo_id: str) -> list[Message]:
+    def new(self, listing: dict, search_term: str):
         pass
 
 
 if __name__ == '__main__':
-    convo = Conversation()
-    print(convo)
+    c = C3('conversations', 'offerup')
+    print(c)
