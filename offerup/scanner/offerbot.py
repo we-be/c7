@@ -2,14 +2,16 @@ import time
 
 from selenium import webdriver
 from pyOfferUp import fetch
-from selenium.common import NoSuchElementException, TimeoutException, ElementNotInteractableException
+from selenium.common import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
+from offerup.c3 import C3, Convo
 from offerup.config import cfg
-from offerup.conversation import C3
+
+OPENER = 'Hello! Is this still available?'  # how we start the convos
 
 # Small window (ask button in footer)
 ASK_XPATH_FOOTER = '/html/body/div[1]/div[5]/footer/div/div[3]/div/div/div[1]'
@@ -60,8 +62,12 @@ class OfferBot:
                 self.driver.find_element(By.XPATH, CHAT_XPATH).click()
                 WebDriverWait(self.driver, 5).until(
                     ec.presence_of_element_located((By.XPATH, NEW_MSG_XPATH))
-                ).send_keys('Hello! Is this still available?')
+                ).send_keys(OPENER)
                 # self.driver.find_element(By.XPATH, SEND_MSG_XPATH).click()
+
+                # save the convo with c3
+                convo = Convo.new(listing["listingId"], model, OPENER)
+                self.c3.new(convo)
 
                 print('done')
                 time.sleep(1000)
