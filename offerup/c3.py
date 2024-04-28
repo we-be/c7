@@ -2,6 +2,7 @@ import dataclasses
 from enum import Enum
 from typing import Optional
 from dataclasses import dataclass
+import json
 
 from azure.cosmos import CosmosClient, DatabaseProxy, ContainerProxy
 
@@ -11,6 +12,15 @@ from offerup.config import cfg
 class MessageRole(Enum):
     User = "User"
     Assistant = "Assistant"
+
+    def to_json(self):
+        return self.value
+
+
+def serialize_enum(obj):
+    if isinstance(obj, MessageRole):
+        return obj.to_json()
+    raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
 
 
 @dataclass
@@ -47,8 +57,8 @@ class C3:
 
     def new(self, convo: Convo):
         # TODO except exceptions.CosmosResourceExistsError
-        d3 = dataclasses.asdict(convo)
-        self.container.create_item(d3)
+        d3 = json.dumps(dataclasses.asdict(convo), default=serialize_enum)
+        self.container.create_item(json.loads(d3))
 
 
 if __name__ == '__main__':

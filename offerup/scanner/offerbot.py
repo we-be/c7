@@ -13,18 +13,12 @@ from offerup.config import cfg
 
 OPENER = 'Hello! Is this still available?'  # how we start the convos
 
-# Small window (ask button in footer)
-ASK_XPATH_FOOTER = '/html/body/div[1]/div[5]/footer/div/div[3]/div/div/div[1]'
-
 # Full window - Work on coaxing the correct path
 ASK_XPATH = '/html/body/div[1]/div[5]/div[2]/main/div[1]/div/div[1]/div/div[3]/div[2]/div[2]/div[1]/button'
-# ASK_XPATH = '/html/body/div[1]/div[5]/div[2]/main/div[1]/div/div[1]/div/div[3]/div[2]/div[2]'
+ASK_XPATH_FOOTER = '/html/body/div[1]/div[5]/footer/div/div[3]/div/div/div[1]'  # Small window (ask button in footer)
 CHAT_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/div/div/div[2]/div/textarea'
-# CHAT_XPATH = '/html/body/div[3]/div[3]/div/div[3]/form/div/div/div[2]/div'
 NEW_MSG_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/div/div/div[2]/div/textarea'
-# NEW_MSG_XPATH = '/html/body/div[3]/div[3]/div/div[3]/form/div/div/div[2]/div/textarea'
 SEND_MSG_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/button'
-# SEND_MSG_XPATH = '/html/body/div[3]/div[3]/div/div[3]/form/button'
 
 
 class OfferBot:
@@ -68,9 +62,7 @@ class OfferBot:
                 # save the convo with c3
                 convo = Convo.new(listing["listingId"], model, OPENER)
                 self.c3.new(convo)
-
-                print('done')
-                time.sleep(1000)
+                print('done', listing["listingId"])
 
     @staticmethod
     def get_listings() -> dict[str, list[dict]]:

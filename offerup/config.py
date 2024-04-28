@@ -17,7 +17,7 @@ else:
 @dataclass
 class Config:
     """Probably want to load this from a config file/app long-term"""
-    DEBUG = True
+    DEBUG = False
     loaded = False  # dotenv loaded
 
     valid_iphone_models: list[str]
