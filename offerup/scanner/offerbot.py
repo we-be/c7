@@ -1,12 +1,10 @@
-import time
-
 from selenium import webdriver
-from pyOfferUp import fetch
 from selenium.common import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
+from pyOfferUp import fetch
 
 from offerup.c3 import C3, Convo
 from offerup.config import cfg
@@ -14,8 +12,11 @@ from offerup.config import cfg
 OPENER = 'Hello! Is this still available?'  # how we start the convos
 
 # Full window - Work on coaxing the correct path
+ASK_XPATH_ALT = '/html/body/div[1]/div[5]/div[2]/main/div[1]/div/div[1]/div/div[3]/div[2]/div[2]/button'
 ASK_XPATH = '/html/body/div[1]/div[5]/div[2]/main/div[1]/div/div[1]/div/div[3]/div[2]/div[2]/div[1]/button'
 ASK_XPATH_FOOTER = '/html/body/div[1]/div[5]/footer/div/div[3]/div/div/div[1]'  # Small window (ask button in footer)
+ASK_SELECTOR = '#page-content > div.jss2060 > main > div:nth-child(1) > div > div.MuiGrid-root.jss2056.MuiGrid-item > div > div:nth-child(3) > div.MuiGrid-root.jss2477.MuiGrid-container.MuiGrid-spacing-xs-2.MuiGrid-direction-xs-column > div:nth-child(2) > button'
+
 CHAT_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/div/div/div[2]/div/textarea'
 NEW_MSG_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/div/div/div[2]/div/textarea'
 SEND_MSG_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/button'
@@ -34,13 +35,14 @@ class OfferBot:
                 # open the listing
                 self.driver.get(listing["listingUrl"])
 
-                # maybe add WebDriverWait here
-                # click the `Ask` button, it could be in the footer if the window is small enough
-                try:
-                    elem = self.driver.find_element(By.XPATH, ASK_XPATH)
-                except NoSuchElementException:
-                    elem = self.driver.find_element(By.XPATH, ASK_XPATH_FOOTER)
-                elem.click()
+                # Get all buttons and look for the one with "Ask" text
+                buttons = self.driver.find_elements(By.TAG_NAME, "button")
+                for button in buttons:
+                    if button.text == "Ask":
+                        button.click()
+                        break
+                else:
+                    raise NoSuchElementException("Could not find ask button.")
 
                 # wait until we see the chat modal or redirect to the inbox
                 wait = WebDriverWait(self.driver, timeout=2, poll_frequency=.2)
@@ -82,3 +84,4 @@ def _init_chromedriver():
 if __name__ == '__main__':
     bot = OfferBot()
     bot.scan()
+    bot.driver.quit()

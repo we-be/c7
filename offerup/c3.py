@@ -51,7 +51,7 @@ class Convo:
 class C3:
     """A cosmos conversation container"""
     def __init__(self, db: str, container: str):
-        self.client: CosmosClient = CosmosClient(*cfg.cosmos_creds())
+        self.client: CosmosClient = CosmosClient(*cfg.cosmos_creds)
         self.db: DatabaseProxy = self.client.get_database_client(db)
         self.container: ContainerProxy = self.db.get_container_client(container)
 

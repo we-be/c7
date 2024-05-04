@@ -37,12 +37,15 @@ class Config:
         self.loaded = True
         load_dotenv(**kwargs)
 
+    def __getitem__(self, item):
+        return os.environ[item]
+
     @classmethod
     def _default(cls) -> Self:
         return cls(
             valid_iphone_models=["iphone 11", "iphone 12", "iphone 13", "iphone 14", "iphone 15"],
             location=("Atlanta", "Georgia"),
-            listing_limit=100,
+            listing_limit=10,
         )
 
     @classmethod
@@ -51,7 +54,7 @@ class Config:
         return cls(
             valid_iphone_models=["Gamer Guy Bath water"],
             location=("Atlanta", "Georgia"),
-            listing_limit=10,
+            listing_limit=3,
         )
 
     @property
@@ -68,13 +71,17 @@ class Config:
             raise AttributeError("`state` must be a string, location should be of form (city, state)")
         return self.location[1]
 
-    @staticmethod
-    def cosmos_creds() -> tuple[str, dict[str, str]]:
+    @property
+    def cosmos_creds(self) -> tuple[str, dict[str, str]]:
         """Azure cosmos connection credentials to be passed into a CosmosClient
         like `azure.cosmos.CosmosClient(*config.cosmos_creds())`"""
-        url = os.getenv("COSMOS_URI")
-        key = {"masterKey": os.getenv("COSMOS_KEY")}
+        url = self["COSMOS_URI"]
+        key = {"masterKey": self["COSMOS_KEY"]}
         return url, key
+
+    @property
+    def anthropic_key(self) -> str:
+        return self["ANTHROPIC_KEY"]
 
 
 cfg = Config.default()  # global config
