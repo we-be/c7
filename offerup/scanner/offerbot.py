@@ -6,7 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from pyOfferUp import fetch
 
-from offerup.c3 import C3, Convo
+from offerup.c3 import C3, Convo, Status
 from offerup.config import cfg
 
 OPENER = 'Hello! Is this still available?'  # how we start the convos
@@ -34,6 +34,7 @@ class OfferBot:
                 self.ask()
 
                 # wait until we see the chat modal or redirect to the inbox
+                # if the code fails here, we're probably not logged in
                 wait = WebDriverWait(self.driver, timeout=2, poll_frequency=.2)
                 wait.until(lambda d: ('inbox' in self.driver.current_url) or
                            self.driver.find_element(By.XPATH, CHAT_XPATH))
@@ -51,7 +52,7 @@ class OfferBot:
                 # self.driver.find_element(By.XPATH, SEND_MSG_XPATH).click()
 
                 # save the convo with c3
-                convo = Convo.new(listing["listingId"], model, OPENER)
+                convo = Convo.new(listing["listingId"], model, OPENER, Status.NEW if not cfg.DEBUG else Status.TEST)
                 self.c3.new(convo)
                 print('done', listing["listingId"])
 

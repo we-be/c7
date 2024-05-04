@@ -3,10 +3,7 @@ from typing import Self
 import os
 import platform
 
-from pyOfferUp import places
 from dotenv import load_dotenv
-
-places.places_dict['South Carolina']['cities']['Bluffton'] = {'lat': 32.237148, 'lon': -80.860390}
 
 if platform.system() == 'Windows':
     CHROME_DATA_PATH = f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data"
@@ -17,7 +14,7 @@ else:
 @dataclass
 class Config:
     """Probably want to load this from a config file/app long-term"""
-    DEBUG = False
+    DEBUG = True
     loaded = False  # dotenv loaded
 
     valid_iphone_models: list[str]
@@ -52,9 +49,10 @@ class Config:
     def _test(cls) -> Self:
         print('Using test configuration')
         return cls(
-            valid_iphone_models=["Gamer Guy Bath water"],
+            # valid_iphone_models=["Gamer Guy Bath water"],
+            valid_iphone_models=["iphone 11", "iphone 12", "iphone 13", "iphone 14", "iphone 15"],
             location=("Atlanta", "Georgia"),
-            listing_limit=3,
+            listing_limit=10,
         )
 
     @property
