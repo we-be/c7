@@ -30,14 +30,8 @@ class OfferBot:
                 # open the listing
                 self.driver.get(listing["listingUrl"])
 
-                # Get all buttons and look for the one with "Ask" text
-                buttons = self.driver.find_elements(By.TAG_NAME, "button")
-                for button in buttons:
-                    if button.text == "Ask":
-                        button.click()
-                        break
-                else:
-                    raise NoSuchElementException("Could not find ask button.")
+                # Locate and click the 'Ask' button
+                self.ask()
 
                 # wait until we see the chat modal or redirect to the inbox
                 wait = WebDriverWait(self.driver, timeout=2, poll_frequency=.2)
@@ -60,6 +54,15 @@ class OfferBot:
                 convo = Convo.new(listing["listingId"], model, OPENER)
                 self.c3.new(convo)
                 print('done', listing["listingId"])
+
+    def ask(self) -> None:
+        """From a listing page, find and click the 'Ask' button"""
+        buttons = self.driver.find_elements(By.TAG_NAME, "button")
+        for button in buttons:
+            if button.text == "Ask":
+                return button.click()
+        else:
+            raise NoSuchElementException("Could not find ask button.")
 
     @staticmethod
     def get_listings() -> dict[str, list[dict]]:
