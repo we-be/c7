@@ -12,11 +12,6 @@ from offerup.config import cfg
 OPENER = 'Hello! Is this still available?'  # how we start the convos
 
 # Full window - Work on coaxing the correct path
-ASK_XPATH_ALT = '/html/body/div[1]/div[5]/div[2]/main/div[1]/div/div[1]/div/div[3]/div[2]/div[2]/button'
-ASK_XPATH = '/html/body/div[1]/div[5]/div[2]/main/div[1]/div/div[1]/div/div[3]/div[2]/div[2]/div[1]/button'
-ASK_XPATH_FOOTER = '/html/body/div[1]/div[5]/footer/div/div[3]/div/div/div[1]'  # Small window (ask button in footer)
-ASK_SELECTOR = '#page-content > div.jss2060 > main > div:nth-child(1) > div > div.MuiGrid-root.jss2056.MuiGrid-item > div > div:nth-child(3) > div.MuiGrid-root.jss2477.MuiGrid-container.MuiGrid-spacing-xs-2.MuiGrid-direction-xs-column > div:nth-child(2) > button'
-
 CHAT_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/div/div/div[2]/div/textarea'
 NEW_MSG_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/div/div/div[2]/div/textarea'
 SEND_MSG_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/button'
