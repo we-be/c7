@@ -1,5 +1,3 @@
-from typing import Optional
-
 import streamlit as st
 import pandas as pd
 from pyOfferUp import fetch
