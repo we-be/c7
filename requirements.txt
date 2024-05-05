@@ -2,3 +2,6 @@ selenium
 pyOfferUp
 azure-cosmos
 python-dotenv
+streamlit
+pandas
+numpy

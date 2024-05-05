@@ -52,7 +52,7 @@ class OfferBot:
                 # self.driver.find_element(By.XPATH, SEND_MSG_XPATH).click()
 
                 # save the convo with c3
-                convo = Convo.new(listing["listingId"], model, OPENER, Status.NEW if not cfg.DEBUG else Status.TEST)
+                convo = Convo.new(listing["listingId"], OPENER, model, Status.NEW if not cfg.DEBUG else Status.TEST)
                 self.c3.new(convo)
                 print('done', listing["listingId"])
 

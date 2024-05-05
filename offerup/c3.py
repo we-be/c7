@@ -23,9 +23,17 @@ class Status(str, Enum):
     HI = "human intervention"  # needs triage by an authorized human being
 
 
+class Grade(str, Enum):
+    A = "A"
+    B = "B"
+    C = "C"
+    D = "D"
+    F = "F"
+
+
 @dataclass
 class MessageContent:
-    type: Optional[str]
+    type: str
     content: str
 
 
@@ -41,10 +49,11 @@ class Convo:
     itemType: str
     messages: list[Message]
     status: Status
+    grade: Optional[Grade] = None
 
     @classmethod
     def new(cls, _id: str, opener: str, item_type: str, status=Status.NEW):
-        opener_content = MessageContent(None, opener)
+        opener_content = MessageContent('text', opener)
         opener_msg = Message(MessageRole.User, opener_content)
         return cls(_id, item_type, [opener_msg], status)
 
@@ -52,6 +61,9 @@ class Convo:
 class C3:
     """A cosmos conversation container"""
     def __init__(self, db: str, container: str):
+        if db != 'conversations' or container != 'offerup':
+            print('Warning: C3 starting with nonstandard db and/or container:', db, container)
+
         self.client: CosmosClient = CosmosClient(*cfg.cosmos_creds)
         self.db: DatabaseProxy = self.client.get_database_client(db)
         self.partition_key = PartitionKey(path="/status")
@@ -75,6 +87,4 @@ class C3:
 
 if __name__ == '__main__':
     c3 = C3('conversations', 'offerup')
-    c3.print_convos()
-    c3.reset()
     c3.print_convos()
