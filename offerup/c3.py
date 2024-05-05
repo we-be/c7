@@ -3,30 +3,18 @@ from enum import Enum
 from typing import Optional
 from dataclasses import dataclass
 import json
-from abc import ABC, abstractmethod
 
 from azure.cosmos import CosmosClient, DatabaseProxy, ContainerProxy, PartitionKey
 
 from offerup.config import cfg
 
 
-class Jenum(Enum):
-    def to_json(self):
-        return self.value
-
-
-def serialize_jenum(obj):
-    if isinstance(obj, Jenum):
-        return obj.to_json()
-    raise TypeError(f'Object of type {obj.__class__.__name__} is not JENUM/JSON serializable')
-
-
-class MessageRole(Jenum):
+class MessageRole(str, Enum):
     User = "User"
     Assistant = "Assistant"
 
 
-class Status(Jenum):
+class Status(str, Enum):
     ACTIVE = "active"  # active conversation, they have responded at least once and we are awaiting response
     PENDING = "pending"  # active conversation, the seller was the last one to respond
     NEW = "new"  # We have messages the customer but have not received a response yet
@@ -71,7 +59,7 @@ class C3:
 
     def new(self, convo: Convo):
         # TODO except exceptions.CosmosResourceExistsError
-        d3 = json.dumps(dataclasses.asdict(convo), default=serialize_jenum)
+        d3 = json.dumps(dataclasses.asdict(convo))
         self.container.create_item(json.loads(d3))
 
     def print_convos(self):
