@@ -2,11 +2,11 @@ from flask import Flask, jsonify
 from .c3 import C3
 
 app = Flask(__name__)
+c3 = C3('conversations', 'offerup')
 
 
 @app.route('/convos')
 def get_convos():
-    c3 = C3('conversations', 'offerup')
     convos = list(c3.container.read_all_items())
     return jsonify(convos)
 
