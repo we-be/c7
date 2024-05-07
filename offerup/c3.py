@@ -24,6 +24,7 @@ class Status(str, Enum):
 
 
 class Grade(str, Enum):
+    A = "A"
     B = "B"
     C = "C"
     D = "D"
