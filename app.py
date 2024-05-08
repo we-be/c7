@@ -20,13 +20,15 @@ with img_col2:
 c3 = C3('conversations', 'offerup')
 
 # Phones List Place Holder
-PHONES = ["iphone 11", "iphone 12", "iphone 13", "iphone 14", "iphone 15"] # TODO Get phones list from API
+PHONES = ["iphone 11", "iphone 12", "iphone 13", "iphone 14", "iphone 15"]  # TODO Get phones list from API
+
 
 # Function to load data
 def load_data():
     all_convos = c3.container.read_all_items()
     df = pd.DataFrame(all_convos)
     return df
+
 
 # Loading data
 data_load_state = st.text('Loading conversations...')
@@ -45,16 +47,19 @@ NUM_CONTAINERS = len(data)
 if 'expand' not in st.session_state:
     st.session_state.expand = [True] + [False] * (NUM_CONTAINERS - 1)
 
+
 # Function to collapse the current expander and expand the next one
 def _next(i):
     st.session_state.expand[i] = False
     if i+1 < NUM_CONTAINERS:
         st.session_state.expand[i+1] = True
 
+
 def _prev(i):
     st.session_state.expand[i] = False
     if i - 1 >= 0:
         st.session_state.expand[i - 1] = True
+
 
 # Function to write listing details
 def write_listing(i, _listing: dict):
@@ -85,14 +90,15 @@ def write_listing(i, _listing: dict):
     results = {'grade' : val_grade, 'back_dmg' : val_back, 'cam_dmg' : val_cam, 'lcd_dmg' : val_lcd, 'version' : val_version, }
     return results
 
+
 # Dictionary to store selected values for each listing
 values = {}
 
 # Iterate over data to display expanders
-for i, _id in enumerate(data.id):
-    listing = fetch.get_listing_details(_id)["data"]["listing"] # TODO Only getting intended listings
-    with st.expander(f"Listing {listing['originalTitle']}  |  ID: {_id}", expanded=st.session_state.expand[i]):
-        values[_id] = write_listing(i, listing)
+for idx, _id in enumerate(data.id):
+    listing = fetch.get_listing_details(_id)["data"]["listing"]  # TODO Only getting intended listings
+    with st.expander(f"Listing {listing['originalTitle']}  |  ID: {_id}", expanded=st.session_state.expand[idx]):
+        values[_id] = write_listing(idx, listing)
 
 # Button to print selected values
 if st.button("Print Selected Grades", key="submit_button"):
