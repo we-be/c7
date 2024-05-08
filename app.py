@@ -1,11 +1,20 @@
 import streamlit as st
 import pandas as pd
 from pyOfferUp import fetch
-
+import os
 from offerup.c3 import C3, Grade
 
+# Get the directory of the current script
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+
 # Displaying the logo
-st.image('https://i.imgur.com/uCGHEMh.png')
+img_col1, img_col2 = st.columns(2)
+with img_col1:
+    c3_path = os.path.join(SCRIPT_DIR, 'logos', 'c3logo.png')
+    st.image(c3_path)
+with img_col2:
+    wb_path = os.path.join(SCRIPT_DIR, 'logos', 'webelogo.png')
+    st.image(wb_path)
 
 # Initializing the OfferUp C3 object
 c3 = C3('conversations', 'offerup')
@@ -38,10 +47,14 @@ if 'expand' not in st.session_state:
 
 # Function to collapse the current expander and expand the next one
 def _next(i):
-    print("test")
     st.session_state.expand[i] = False
     if i+1 < NUM_CONTAINERS:
         st.session_state.expand[i+1] = True
+
+def _prev(i):
+    st.session_state.expand[i] = False
+    if i - 1 >= 0:
+        st.session_state.expand[i - 1] = True
 
 # Function to write listing details
 def write_listing(i, _listing: dict):
@@ -49,24 +62,25 @@ def write_listing(i, _listing: dict):
     st.subheader(f'{_listing["originalTitle"]}: ${_listing["originalPrice"]}')
     # Displaying listing description
     st.write(_listing["description"])
-    # Creating columns for different options
-    col1, col2, col3 = st.columns(3)
-    # Column 1: Grade radio button
-    with col1:
-        val_grade = st.radio("Grade", Grade._member_names_, key=f"grade_{i}", index=None)
-    # Column 2: Damage options
-    with col2:
-        st.markdown("<div style='padding-bottom: 0.25rem; font-size: 14px;'>Damage</div>", unsafe_allow_html=True)
-        val_back = st.checkbox("Cracked Back", key=f"back_{i}")
-        val_cam = st.checkbox("Cracked Camera", key=f"cam_{i}")
-        val_lcd = st.checkbox("LCD Damage", key=f"lcd_{i}")
-    # Column 3: Version selection and Next button
-    with col3:
-        val_version = st.selectbox("Version", PHONES, key=f"ver_{i}", placeholder=PHONES[0]) # TODO Replace placeholder with value of phone
-        st.button("Next", on_click=_next, args=(i,), key=f"next_{i}")
     # Displaying listing photos
     photos = _listing["photos"]
     st.image([photo["detail"]["url"] for photo in photos])
+    val_version = st.radio("Version", PHONES, horizontal=True, key=f"ver_{i}", index=None)
+    val_grade = st.radio("Grade", Grade._member_names_, horizontal=True, key=f"grade_{i}", index=None)
+    # Creating columns for different options
+    st.markdown("<div style='padding-bottom: 0.25rem; font-size: 14px;'>Damage</div>", unsafe_allow_html=True)
+    dmg_col1, dmg_col2, dmg_col3 = st.columns(3)
+    with dmg_col1:
+        val_back = st.checkbox("Cracked Back", key=f"back_{i}")
+    with dmg_col2:
+        val_cam = st.checkbox("Cracked Camera", key=f"cam_{i}")
+    with dmg_col3:
+        val_lcd = st.checkbox("LCD Damage", key=f"lcd_{i}")
+    prog_col1, prog_col2 = st.columns(2)
+    with prog_col1:
+        st.button("Next", on_click=_next, args=(i,), key=f"next_{i}", use_container_width=True)
+    with prog_col2:
+        st.button("Previous", on_click=_prev, args=(i,), key=f"prev_{i}", use_container_width=True)
     # Returning selected values as a dictionary
     results = {'grade' : val_grade, 'back_dmg' : val_back, 'cam_dmg' : val_cam, 'lcd_dmg' : val_lcd, 'version' : val_version, }
     return results
@@ -83,5 +97,5 @@ for i, _id in enumerate(data.id):
 # Button to print selected values
 if st.button("Print Selected Grades", key="submit_button"):
     for _id, value in values.items():
-        if value is not None:
+        if value['grade'] is not None:
             print(f"Grade selected for Listing ID {_id}: {value}")
