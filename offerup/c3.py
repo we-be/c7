@@ -28,7 +28,6 @@ class Grade(str, Enum):
     B = "B"
     C = "C"
     D = "D"
-    F = "F"
 
 
 @dataclass
