@@ -6,7 +6,7 @@ from offerup.c3 import C3, GRADES
 
 # limit number of results that we actually display during testing
 # to reduce db usage and app lag. need to fix c7/issues/7.
-LIMIT = 5  # TODO remove in prod
+LIMIT = 15  # TODO remove in prod
 
 # Get the directory of the current script
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
