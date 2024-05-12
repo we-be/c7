@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from pyOfferUp import fetch
 import os
-from offerup.c3 import C3, Grade
+from offerup.c3 import C3, GRADES
 
 # Get the directory of the current script
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -71,7 +71,7 @@ def write_listing(i, _listing: dict):
     photos = _listing["photos"]
     st.image([photo["detail"]["url"] for photo in photos])
     val_version = st.radio("Version", PHONES, horizontal=True, key=f"ver_{i}", index=None)
-    val_grade = st.radio("Grade", Grade._member_names_, horizontal=True, key=f"grade_{i}", index=None)
+    val_grade = st.radio("Grade", GRADES, horizontal=True, key=f"grade_{i}", index=None)
     # Creating columns for different options
     st.markdown("<div style='padding-bottom: 0.25rem; font-size: 14px;'>Damage</div>", unsafe_allow_html=True)
     dmg_col1, dmg_col2, dmg_col3 = st.columns(3)
@@ -83,11 +83,11 @@ def write_listing(i, _listing: dict):
         val_lcd = st.checkbox("LCD Damage", key=f"lcd_{i}")
     prog_col1, prog_col2 = st.columns(2)
     with prog_col1:
-        st.button("Next", on_click=_next, args=(i,), key=f"next_{i}", use_container_width=True)
-    with prog_col2:
         st.button("Previous", on_click=_prev, args=(i,), key=f"prev_{i}", use_container_width=True)
+    with prog_col2:
+        st.button("Next", on_click=_next, args=(i,), key=f"next_{i}", use_container_width=True)
     # Returning selected values as a dictionary
-    results = {'grade' : val_grade, 'back_dmg' : val_back, 'cam_dmg' : val_cam, 'lcd_dmg' : val_lcd, 'version' : val_version, }
+    results = {'grade': val_grade, 'back_dmg': val_back, 'cam_dmg': val_cam, 'lcd_dmg': val_lcd, 'version': val_version}
     return results
 
 

@@ -35,7 +35,7 @@ class OfferBot:
 
                 # wait until we see the chat modal or redirect to the inbox
                 # if the code fails here, we're probably not logged in
-                wait = WebDriverWait(self.driver, timeout=2, poll_frequency=.2)
+                wait = WebDriverWait(self.driver, timeout=10, poll_frequency=.2)
                 wait.until(lambda d: ('inbox' in self.driver.current_url) or
                            self.driver.find_element(By.XPATH, CHAT_XPATH))
 

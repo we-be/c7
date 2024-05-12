@@ -23,11 +23,7 @@ class Status(str, Enum):
     HI = "human intervention"  # needs triage by an authorized human being
 
 
-class Grade(str, Enum):
-    A = "A"
-    B = "B"
-    C = "C"
-    D = "D"
+GRADES = ["A", "B", "C", "D"]
 
 
 @dataclass
@@ -48,7 +44,7 @@ class Convo:
     itemType: str
     messages: list[Message]
     status: Status
-    grade: Optional[Grade] = None
+    grade: Optional[str] = None
 
     @classmethod
     def new(cls, _id: str, opener: str, item_type: str, status=Status.NEW):
