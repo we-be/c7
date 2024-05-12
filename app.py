@@ -91,7 +91,8 @@ def write_listing(i, _listing: dict):
     with prog_col2:
         st.button("Next", on_click=_next, args=(i,), key=f"next_{i}", use_container_width=True)
     # Returning selected values as a dictionary
-    results = {'grade': val_grade, 'back_dmg': val_back, 'cam_dmg': val_cam, 'lcd_dmg': val_lcd, 'version': val_version}
+    results = {'grade': val_grade, 'back_dmg': val_back, 'cam_dmg': val_cam, 'lcd_dmg': val_lcd,
+               'itemType': val_version}
     return results
 
 
