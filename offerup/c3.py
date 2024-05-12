@@ -73,7 +73,6 @@ class C3:
         ops = []
         for k, v in kwargs.items():
             ops.append({'op': 'add', 'path': '/' + k, 'value': v})
-        print("LID", repr(listing_id), "OPS", ops)
         self.container.patch_item(item=listing_id, partition_key=partition, patch_operations=ops)
 
     def print_convos(self):
