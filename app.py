@@ -4,6 +4,10 @@ from pyOfferUp import fetch
 import os
 from offerup.c3 import C3, GRADES
 
+# limit number of results that we actually display during testing
+# to reduce db usage and app lag. need to fix c7/issues/7.
+LIMIT = 5  # TODO remove in prod
+
 # Get the directory of the current script
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -32,7 +36,7 @@ def load_data():
 
 # Loading data
 data_load_state = st.text('Loading conversations...')
-data = load_data()
+data = load_data()[:LIMIT]
 data_load_state.text("Loading conversations... Done!")
 
 # Checkbox to display raw data
@@ -102,6 +106,7 @@ for idx, _id in enumerate(data.id):
 
 # Button to print selected values
 if st.button("Print Selected Grades", key="submit_button"):
-    for _id, value in values.items():
-        if value['grade'] is not None:
-            print(f"Grade selected for Listing ID {_id}: {value}")
+    for _id, listing_body in values.items():
+        if listing_body['grade'] is not None:
+            print(f"Grade selected for Listing ID {_id}: {listing_body}")
+            c3.update(_id, **listing_body)
