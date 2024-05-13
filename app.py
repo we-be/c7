@@ -1,8 +1,11 @@
+import os
+
 import streamlit as st
 import pandas as pd
 from pyOfferUp import fetch
-import os
+
 from offerup.c3 import C3, GRADES
+from offerup.config import PHONES
 
 # limit number of results that we actually display during testing
 # to reduce db usage and app lag. need to fix c7/issues/7.
@@ -22,9 +25,6 @@ with img_col2:
 
 # Initializing the OfferUp C3 object
 c3 = C3('conversations', 'offerup')
-
-# Phones List Place Holder
-PHONES = ["iphone 11", "iphone 12", "iphone 13", "iphone 14", "iphone 15"]  # TODO Get phones list from API
 
 
 # Function to load data
@@ -74,7 +74,7 @@ def write_listing(i, _listing: dict):
     # Displaying listing photos
     photos = _listing["photos"]
     st.image([photo["detail"]["url"] for photo in photos])
-    val_version = st.radio("Version", PHONES, horizontal=True, key=f"ver_{i}", index=None)
+    val_item_type = st.radio("Device", ["bad device"] + PHONES, horizontal=True, key=f"ver_{i}", index=None)
     val_grade = st.radio("Grade", GRADES, horizontal=True, key=f"grade_{i}", index=None)
     # Creating columns for different options
     st.markdown("<div style='padding-bottom: 0.25rem; font-size: 14px;'>Damage</div>", unsafe_allow_html=True)
@@ -92,7 +92,7 @@ def write_listing(i, _listing: dict):
         st.button("Next", on_click=_next, args=(i,), key=f"next_{i}", use_container_width=True)
     # Returning selected values as a dictionary
     results = {'grade': val_grade, 'back_dmg': val_back, 'cam_dmg': val_cam, 'lcd_dmg': val_lcd,
-               'itemType': val_version}
+               'itemType': val_item_type}
     return results
 
 
