@@ -1,4 +1,6 @@
 import os
+import random
+
 import streamlit as st
 import pandas as pd
 from pyOfferUp import fetch
@@ -23,11 +25,13 @@ with img_col2:
 # Initializing the OfferUp C3 object
 c3 = C3('conversations', 'offerup')
 
+
 # Function to load data
 def load_data():
     all_convos = c3.container.read_all_items()
     df = pd.DataFrame(all_convos)
     return df
+
 
 # Loading data
 data_load_state = st.text('Loading conversations...')
@@ -39,25 +43,28 @@ if st.checkbox('`C3: conversations/offerup`'):
     st.subheader('Raw data')
     st.write(data)
 
+
 def update_df():
     listings_df = pd.DataFrame(columns=['id', 'title', 'price', 'description', 'photo_urls'])
     listing_details_list = []
-    for _id in data.id:
-        listing_details = fetch.get_listing_details(_id)["data"]["listing"]
-        listing_details_list.append({'id': _id,
-                                    'title': listing_details['title'],
-                                    'price': listing_details['price'],
-                                    'description': listing_details['description'],
-                                    'photo_urls': [photo["detail"]["url"] for photo in listing_details["photos"]]})
+    for listing_id in data.id:
+        listing_details = fetch.get_listing_details(listing_id)["data"]["listing"]
+        listing_details_list.append({'id': listing_id,
+                                     'title': listing_details['title'],
+                                     'price': listing_details['price'],
+                                     'description': listing_details['description'],
+                                     'photo_urls': [photo["detail"]["url"] for photo in listing_details["photos"]]})
     # Convert the list of dictionaries to a DataFrame
     new_listings_df = pd.DataFrame(listing_details_list)
     # Concatenate the new DataFrame with the existing DataFrame
     return pd.concat([listings_df, new_listings_df], ignore_index=True)
 
+
 def init_session():
     if 'listings_df' not in st.session_state:
         print("init")
         st.session_state.listings_df = update_df()
+
 
 # Dictionary to store selected values for each listing
 values = {}
@@ -115,8 +122,10 @@ def write_listing(i):
                'itemType': val_item_type}
     return results
 
+
 # Iterate over data to display expanders
 for idx in range(min(NUM_CONTAINERS, len(st.session_state.listings_df))):
+    print("ITER!", random.randint(0, 100))
     with st.expander(f"Listing {st.session_state.listings_df.iloc[idx]['title']}  |  ID: {st.session_state.listings_df.iloc[idx]['id']}",
                      expanded=st.session_state.expand[idx]):
         values[st.session_state.listings_df.iloc[idx]['id']] = write_listing(idx)
