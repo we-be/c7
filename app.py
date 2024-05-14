@@ -14,6 +14,9 @@ LIMIT = 15  # TODO remove in prod
 # Get the directory of the current script
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
+# Dictionary to store selected values for each listing
+values = {}
+
 # Displaying the logo
 img_col1, img_col2 = st.columns(2)
 with img_col1:
@@ -26,18 +29,26 @@ with img_col2:
 # Initializing the OfferUp C3 object
 c3 = C3('conversations', 'offerup')
 
-
 # Function to load data
 def load_data():
     all_convos = c3.container.read_all_items()
     df = pd.DataFrame(all_convos)
     return df
 
+pre_col1, pre_col2 = st.columns(2)
+with pre_col1:
+    # Loading data
+    data_load_state = st.text('Loading conversations...')
+    data = load_data()[:LIMIT]
+    data_load_state.text("Loading conversations... Done!")
 
-# Loading data
-data_load_state = st.text('Loading conversations...')
-data = load_data()[:LIMIT]
-data_load_state.text("Loading conversations... Done!")
+with pre_col2:
+    # Button to print selected values
+    if st.button("Print Selected Grades", key="submit_button", use_container_width=True):
+        for _id, listing_body in values.items():
+            if listing_body['grade'] is not None:
+                print(f"Grade selected for Listing ID {_id}: {listing_body}")
+                c3.update(_id, **listing_body)
 
 # Checkbox to display raw data
 if st.checkbox('`C3: conversations/offerup`'):
@@ -95,19 +106,8 @@ def write_listing(i, _listing: dict):
                'itemType': val_item_type}
     return results
 
-
-# Dictionary to store selected values for each listing
-values = {}
-
 # Iterate over data to display expanders
 for idx, _id in enumerate(data.id):
     listing = fetch.get_listing_details(_id)["data"]["listing"]  # TODO Only getting intended listings
     with st.expander(f"Listing {listing['originalTitle']}  |  ID: {_id}", expanded=st.session_state.expand[idx]):
         values[_id] = write_listing(idx, listing)
-
-# Button to print selected values
-if st.button("Print Selected Grades", key="submit_button"):
-    for _id, listing_body in values.items():
-        if listing_body['grade'] is not None:
-            print(f"Grade selected for Listing ID {_id}: {listing_body}")
-            c3.update(_id, **listing_body)
