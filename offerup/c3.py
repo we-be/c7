@@ -69,6 +69,12 @@ class C3:
         d3 = json.dumps(dataclasses.asdict(convo))
         self.container.create_item(json.loads(d3))
 
+    def update(self, listing_id: str, partition='test', **kwargs):
+        ops = []
+        for k, v in kwargs.items():
+            ops.append({'op': 'add', 'path': '/' + k, 'value': v})
+        self.container.patch_item(item=listing_id, partition_key=partition, patch_operations=ops)
+
     def print_convos(self):
         for c in self.container.read_all_items():
             print(c)
@@ -82,4 +88,5 @@ class C3:
 
 if __name__ == '__main__':
     c3 = C3('conversations', 'offerup')
-    c3.print_convos()
+    c3.update('e628118b-aa72-3639-adef-a459f912763e', grade='C')
+    # c3.print_convos()

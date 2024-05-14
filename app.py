@@ -1,8 +1,15 @@
+import os
+
 import streamlit as st
 import pandas as pd
 from pyOfferUp import fetch
-import os
+
 from offerup.c3 import C3, GRADES
+from offerup.config import PHONES
+
+# limit number of results that we actually display during testing
+# to reduce db usage and app lag. need to fix c7/issues/7.
+LIMIT = 15  # TODO remove in prod
 
 # Get the directory of the current script
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -19,9 +26,6 @@ with img_col2:
 # Initializing the OfferUp C3 object
 c3 = C3('conversations', 'offerup')
 
-# Phones List Place Holder
-PHONES = ["iphone 11", "iphone 12", "iphone 13", "iphone 14", "iphone 15"]  # TODO Get phones list from API
-
 
 # Function to load data
 def load_data():
@@ -32,7 +36,7 @@ def load_data():
 
 # Loading data
 data_load_state = st.text('Loading conversations...')
-data = load_data()
+data = load_data()[:LIMIT]
 data_load_state.text("Loading conversations... Done!")
 
 # Checkbox to display raw data
@@ -70,7 +74,7 @@ def write_listing(i, _listing: dict):
     # Displaying listing photos
     photos = _listing["photos"]
     st.image([photo["detail"]["url"] for photo in photos])
-    val_version = st.radio("Version", PHONES, horizontal=True, key=f"ver_{i}", index=None)
+    val_item_type = st.radio("Device", ["bad device"] + PHONES, horizontal=True, key=f"ver_{i}", index=None)
     val_grade = st.radio("Grade", GRADES, horizontal=True, key=f"grade_{i}", index=None)
     # Creating columns for different options
     st.markdown("<div style='padding-bottom: 0.25rem; font-size: 14px;'>Damage</div>", unsafe_allow_html=True)
@@ -87,7 +91,8 @@ def write_listing(i, _listing: dict):
     with prog_col2:
         st.button("Next", on_click=_next, args=(i,), key=f"next_{i}", use_container_width=True)
     # Returning selected values as a dictionary
-    results = {'grade': val_grade, 'back_dmg': val_back, 'cam_dmg': val_cam, 'lcd_dmg': val_lcd, 'version': val_version}
+    results = {'grade': val_grade, 'back_dmg': val_back, 'cam_dmg': val_cam, 'lcd_dmg': val_lcd,
+               'itemType': val_item_type}
     return results
 
 
@@ -102,6 +107,7 @@ for idx, _id in enumerate(data.id):
 
 # Button to print selected values
 if st.button("Print Selected Grades", key="submit_button"):
-    for _id, value in values.items():
-        if value['grade'] is not None:
-            print(f"Grade selected for Listing ID {_id}: {value}")
+    for _id, listing_body in values.items():
+        if listing_body['grade'] is not None:
+            print(f"Grade selected for Listing ID {_id}: {listing_body}")
+            c3.update(_id, **listing_body)
