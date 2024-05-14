@@ -1,5 +1,4 @@
 import os
-
 import streamlit as st
 import pandas as pd
 from pyOfferUp import fetch
@@ -8,17 +7,9 @@ from offerup.c3 import C3, GRADES
 from offerup.config import PHONES
 
 # limit number of results that we actually display during testing
-# to reduce db usage and app lag. need to fix c7/issues/7.
 LIMIT = 15  # TODO remove in prod
-
 # Get the directory of the current script
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-
-# Dictionary to store selected values for each listing
-values = {}
-
-# Create an empty DataFrame to store listings
-listings_df = pd.DataFrame(columns=['id', 'title', 'price', 'description', 'photo_urls'])
 
 # Displaying the logo
 img_col1, img_col2 = st.columns(2)
@@ -38,37 +29,40 @@ def load_data():
     df = pd.DataFrame(all_convos)
     return df
 
-pre_col1, pre_col2 = st.columns(2)
-with pre_col1:
-    # Loading data
-    data_load_state = st.text('Loading conversations...')
-    data = load_data()[:LIMIT]
-    data_load_state.text("Loading conversations... Done!")
-
-with pre_col2:
-    # Button to print selected values
-    if st.button("Print Selected Grades", key="submit_button", use_container_width=True):
-        for _id, listing_body in values.items():
-            if listing_body['grade'] is not None:
-                print(f"Grade selected for Listing ID {_id}: {listing_body}")
-                c3.update(_id, **listing_body)
-        listing_details_list = []
-        for idx, _id in enumerate(data.id):
-            listing_details = fetch.get_listing_details(_id)["data"]["listing"]
-            listing_details_list.append({'id': _id,
-                                        'title': listing_details['title'],
-                                        'price': listing_details['price'],
-                                        'description': listing_details['description'],
-                                        'photo_urls': [photo["detail"]["url"] for photo in listing_details["photos"]]})
-        # Convert the list of dictionaries to a DataFrame
-        new_listings_df = pd.DataFrame(listing_details_list)
-        # Concatenate the new DataFrame with the existing DataFrame
-        listings_df = pd.concat([listings_df, new_listings_df], ignore_index=True)
+# Loading data
+data_load_state = st.text('Loading conversations...')
+data = load_data()[:LIMIT]
+data_load_state.text("Loading conversations... Done!")
 
 # Checkbox to display raw data
 if st.checkbox('`C3: conversations/offerup`'):
     st.subheader('Raw data')
     st.write(data)
+
+def update_df():
+    listings_df = pd.DataFrame(columns=['id', 'title', 'price', 'description', 'photo_urls'])
+    listing_details_list = []
+    for _id in data.id:
+        listing_details = fetch.get_listing_details(_id)["data"]["listing"]
+        listing_details_list.append({'id': _id,
+                                    'title': listing_details['title'],
+                                    'price': listing_details['price'],
+                                    'description': listing_details['description'],
+                                    'photo_urls': [photo["detail"]["url"] for photo in listing_details["photos"]]})
+    # Convert the list of dictionaries to a DataFrame
+    new_listings_df = pd.DataFrame(listing_details_list)
+    # Concatenate the new DataFrame with the existing DataFrame
+    return pd.concat([listings_df, new_listings_df], ignore_index=True)
+
+def init_session():
+    if 'listings_df' not in st.session_state:
+        print("init")
+        st.session_state.listings_df = update_df()
+
+# Dictionary to store selected values for each listing
+values = {}
+
+init_session()
 
 # Number of containers
 NUM_CONTAINERS = len(data)
@@ -93,7 +87,7 @@ def _prev(i):
 
 # Function to write listing details
 def write_listing(i):
-    listing = listings_df.iloc[i]  # Fetch the listing from the DataFrame
+    listing = st.session_state.listings_df.iloc[i]  # Fetch the listing from the DataFrame
     # Displaying listing title and price
     st.subheader(f'{listing["title"]}: ${listing["price"]}')
     # Displaying listing description
@@ -122,7 +116,15 @@ def write_listing(i):
     return results
 
 # Iterate over data to display expanders
-for idx in range(min(NUM_CONTAINERS, len(listings_df))):
-    with st.expander(f"Listing {listings_df.iloc[idx]['title']}  |  ID: {listings_df.iloc[idx]['id']}",
+for idx in range(min(NUM_CONTAINERS, len(st.session_state.listings_df))):
+    with st.expander(f"Listing {st.session_state.listings_df.iloc[idx]['title']}  |  ID: {st.session_state.listings_df.iloc[idx]['id']}",
                      expanded=st.session_state.expand[idx]):
-        values[listings_df.iloc[idx]['id']] = write_listing(idx)
+        values[st.session_state.listings_df.iloc[idx]['id']] = write_listing(idx)
+
+# Button to print selected values
+if st.button("Print Selected Grades", key="submit_button", use_container_width=True):
+    for _id, listing_body in values.items():
+        if listing_body['grade'] is not None:
+            print(f"Grade selected for Listing ID {_id}: {listing_body}")
+            c3.update(_id, **listing_body)
+    st.session_state.listings_df = update_df()
