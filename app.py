@@ -17,6 +17,9 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 # Dictionary to store selected values for each listing
 values = {}
 
+# Create an empty DataFrame to store listings
+listings_df = pd.DataFrame(columns=['id', 'title', 'price', 'description', 'photo_urls'])
+
 # Displaying the logo
 img_col1, img_col2 = st.columns(2)
 with img_col1:
@@ -49,6 +52,18 @@ with pre_col2:
             if listing_body['grade'] is not None:
                 print(f"Grade selected for Listing ID {_id}: {listing_body}")
                 c3.update(_id, **listing_body)
+        listing_details_list = []
+        for idx, _id in enumerate(data.id):
+            listing_details = fetch.get_listing_details(_id)["data"]["listing"]
+            listing_details_list.append({'id': _id,
+                                        'title': listing_details['title'],
+                                        'price': listing_details['price'],
+                                        'description': listing_details['description'],
+                                        'photo_urls': [photo["detail"]["url"] for photo in listing_details["photos"]]})
+        # Convert the list of dictionaries to a DataFrame
+        new_listings_df = pd.DataFrame(listing_details_list)
+        # Concatenate the new DataFrame with the existing DataFrame
+        listings_df = pd.concat([listings_df, new_listings_df], ignore_index=True)
 
 # Checkbox to display raw data
 if st.checkbox('`C3: conversations/offerup`'):
@@ -77,14 +92,14 @@ def _prev(i):
 
 
 # Function to write listing details
-def write_listing(i, _listing: dict):
+def write_listing(i):
+    listing = listings_df.iloc[i]  # Fetch the listing from the DataFrame
     # Displaying listing title and price
-    st.subheader(f'{_listing["originalTitle"]}: ${_listing["originalPrice"]}')
+    st.subheader(f'{listing["title"]}: ${listing["price"]}')
     # Displaying listing description
-    st.write(_listing["description"])
-    # Displaying listing photos
-    photos = _listing["photos"]
-    st.image([photo["detail"]["url"] for photo in photos])
+    st.write(listing["description"])
+    # Displaying listing photos (assuming 'photo_url' is a URL to the photo)
+    st.image(listing["photo_urls"])
     val_item_type = st.radio("Device", ["bad device"] + PHONES, horizontal=True, key=f"ver_{i}", index=None)
     val_grade = st.radio("Grade", GRADES, horizontal=True, key=f"grade_{i}", index=None)
     # Creating columns for different options
@@ -107,7 +122,7 @@ def write_listing(i, _listing: dict):
     return results
 
 # Iterate over data to display expanders
-for idx, _id in enumerate(data.id):
-    listing = fetch.get_listing_details(_id)["data"]["listing"]  # TODO Only getting intended listings
-    with st.expander(f"Listing {listing['originalTitle']}  |  ID: {_id}", expanded=st.session_state.expand[idx]):
-        values[_id] = write_listing(idx, listing)
+for idx in range(min(NUM_CONTAINERS, len(listings_df))):
+    with st.expander(f"Listing {listings_df.iloc[idx]['title']}  |  ID: {listings_df.iloc[idx]['id']}",
+                     expanded=st.session_state.expand[idx]):
+        values[listings_df.iloc[idx]['id']] = write_listing(idx)
