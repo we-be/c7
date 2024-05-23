@@ -43,11 +43,11 @@ def update_df():
     listings_df = pd.DataFrame(columns=['id', 'title', 'price', 'description', 'item_type', 'photo_urls'])
     listing_details_list = []
     phones_dict = {phone: i + 1 for i, phone in enumerate(PHONES)}
-    for _id in data.id:
-        listing_details = fetch.get_listing_details(_id)["data"]["listing"]
-        item_type = 'iphone 11' # TODO replace with code that gets itemType from get_listing_details
+    for row in data.iterrows():
+        listing_details = fetch.get_listing_details(row['id'])["data"]["listing"]
+        item_type = row['itemType']
         item_index = phones_dict.get(item_type, None)
-        listing_details_list.append({'id': _id,
+        listing_details_list.append({'id': row['id'],
                                     'title': listing_details['title'],
                                     'price': listing_details['price'],
                                     'description': listing_details['description'],
@@ -71,7 +71,6 @@ init_session()
 # Number of containers
 NUM_CONTAINERS = len(data)
 
-# Create a list of dictionaries
 
 # Initializing session state for expander expansion
 if 'expand' not in st.session_state:
@@ -127,10 +126,12 @@ def write_listing(i, item_index):
 
 # Iterate over data to display expanders
 for idx in range(min(NUM_CONTAINERS, len(st.session_state.listings_df))):
-    item_index = int(st.session_state.listings_df.iloc[idx]['item_index'])
-    with st.expander(f"Listing {st.session_state.listings_df.iloc[idx]['title']}  |  ID: {st.session_state.listings_df.iloc[idx]['id']}",
-                     expanded=st.session_state.expand[idx]):
-        values[st.session_state.listings_df.iloc[idx]['id']] = write_listing(idx, item_index)
+    item_index = st.session_state.listings_df.iloc[idx]['item_index']
+    if pd.notna(item_index):
+        item_index = int(item_index)
+        with st.expander(f"Listing {st.session_state.listings_df.iloc[idx]['title']}  |  ID: {st.session_state.listings_df.iloc[idx]['id']}",
+                        expanded=st.session_state.expand[idx]):
+            values[st.session_state.listings_df.iloc[idx]['id']] = write_listing(idx, item_index)
 
 # Button to print selected values
 if st.button("Save Changes", key="submit_button", use_container_width=True):
