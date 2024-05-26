@@ -17,6 +17,7 @@ if platform.system() == 'Windows':
 else:
     # FIREFOX_DATA_PATH = f"-profile {os.path.expanduser('~')}/snap/firefox/common/.mozilla/firefox/cd3jw6g1.default"
     FIREFOX_DATA_PATH = f"{os.path.expanduser('~')}/snap/firefox/common/.mozilla/firefox/cd3jw6g1.default"
+    FIREFOX_BINARY_PATH = '/snap/firefox/4259/usr/lib/firefox/firefox'
 
 
 @dataclass
@@ -30,6 +31,7 @@ class Config:
 
     chrome_data_path = CHROME_DATA_PATH
     firefox_data_path = FIREFOX_DATA_PATH
+    firefox_binary_path = FIREFOX_BINARY_PATH
 
     @classmethod
     def default(cls, load=True, debug=False, **kwargs) -> Self:

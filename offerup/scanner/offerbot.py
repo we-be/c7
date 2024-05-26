@@ -83,13 +83,13 @@ def _init_webdriver(browser: Literal['chrome', 'firefox']):
         firefox_options = FirefoxOptions()
         firefox_options.add_argument("-profile")
         firefox_options.add_argument(cfg.firefox_data_path)
-        firefox_options.binary_location = '/snap/firefox/4259/usr/lib/firefox/firefox'
+        firefox_options.binary_location = cfg.firefox_binary_path
         return webdriver.Firefox(options=firefox_options)
     else:
         raise ValueError(f"Unsupported browser: {browser}")
 
 
 if __name__ == '__main__':
-    bot = OfferBot('firefox')
+    bot = OfferBot('chrome')
     bot.scan()
     bot.driver.quit()
