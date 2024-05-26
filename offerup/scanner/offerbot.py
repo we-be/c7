@@ -1,6 +1,9 @@
+from typing import Literal
+
 from selenium import webdriver
 from selenium.common import NoSuchElementException
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
@@ -8,8 +11,6 @@ from pyOfferUp import fetch
 
 from offerup.c3 import C3, Convo, Status
 from offerup.config import cfg
-
-OPENER = 'Hello! Is this still available?'  # how we start the convos
 
 # Full window - Work on coaxing the correct path
 CHAT_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/div/div/div[2]/div/textarea'
@@ -19,8 +20,8 @@ SEND_MSG_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/button'
 
 class OfferBot:
     """Ask questions and make offers"""
-    def __init__(self):
-        self.driver = _init_chromedriver()
+    def __init__(self, browser: Literal['chrome', 'firefox']):
+        self.driver = _init_webdriver(browser)
         self.c3 = C3('conversations', 'offerup')  # cosmos conversation container
 
     def scan(self):
@@ -48,11 +49,10 @@ class OfferBot:
                 self.driver.find_element(By.XPATH, CHAT_XPATH).click()
                 WebDriverWait(self.driver, 5).until(
                     ec.presence_of_element_located((By.XPATH, NEW_MSG_XPATH))
-                ).send_keys(OPENER)
-                # self.driver.find_element(By.XPATH, SEND_MSG_XPATH).click()
+                )
 
                 # save the convo with c3
-                convo = Convo.new(listing["listingId"], OPENER, model, Status.NEW if not cfg.DEBUG else Status.TEST)
+                convo = Convo.new(listing["listingId"], model, Status.NEW)
                 self.c3.new(convo)
                 print('done', listing["listingId"])
 
@@ -74,13 +74,22 @@ class OfferBot:
         return all_listings
 
 
-def _init_chromedriver():
-    chrome_options = Options()
-    chrome_options.add_argument(cfg.chrome_data_path)
-    return webdriver.Chrome(options=chrome_options)
+def _init_webdriver(browser: Literal['chrome', 'firefox']):
+    if browser.lower() == 'chrome':
+        chrome_options = ChromeOptions()
+        chrome_options.add_argument(cfg.chrome_data_path)
+        return webdriver.Chrome(options=chrome_options)
+    elif browser.lower() == 'firefox':
+        firefox_options = FirefoxOptions()
+        firefox_options.add_argument("-profile")
+        firefox_options.add_argument(cfg.firefox_data_path)
+        firefox_options.binary_location = '/snap/firefox/4259/usr/lib/firefox/firefox'
+        return webdriver.Firefox(options=firefox_options)
+    else:
+        raise ValueError(f"Unsupported browser: {browser}")
 
 
 if __name__ == '__main__':
-    bot = OfferBot()
+    bot = OfferBot('firefox')
     bot.scan()
     bot.driver.quit()

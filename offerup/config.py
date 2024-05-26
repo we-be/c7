@@ -5,28 +5,35 @@ import platform
 
 from dotenv import load_dotenv
 
-PHONES = ["iphone 11", "iphone 12", "iphone 13", "iphone 14", "iphone 15"]
+PHONES = list(reversed(["iphone 11", "iphone 12", "iphone 13", "iphone 14", "iphone 15"]))
 
 if platform.system() == 'Windows':
     CHROME_DATA_PATH = f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data"
 else:
     CHROME_DATA_PATH = f"user-data-dir={os.path.expanduser('~')}/.config/google-chrome"
 
+if platform.system() == 'Windows':
+    raise OSError("Windows Firefox webdriver not supported")
+else:
+    # FIREFOX_DATA_PATH = f"-profile {os.path.expanduser('~')}/snap/firefox/common/.mozilla/firefox/cd3jw6g1.default"
+    FIREFOX_DATA_PATH = f"{os.path.expanduser('~')}/snap/firefox/common/.mozilla/firefox/cd3jw6g1.default"
+
 
 @dataclass
 class Config:
     """Probably want to load this from a config file/app long-term"""
-    DEBUG = True
     loaded = False  # dotenv loaded
 
     valid_iphone_models: list[str]
     location: tuple[str, str]
     listing_limit: int
+
     chrome_data_path = CHROME_DATA_PATH
+    firefox_data_path = FIREFOX_DATA_PATH
 
     @classmethod
-    def default(cls, load=True, **kwargs) -> Self:
-        _cfg = cls._default() if not cls.DEBUG else cls._test()
+    def default(cls, load=True, debug=False, **kwargs) -> Self:
+        _cfg = cls._default() if not debug else cls._test()
         if load:
             _cfg.load(**kwargs)
         return _cfg

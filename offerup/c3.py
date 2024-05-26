@@ -47,10 +47,8 @@ class Convo:
     grade: Optional[str] = None
 
     @classmethod
-    def new(cls, _id: str, opener: str, item_type: str, status=Status.NEW):
-        opener_content = MessageContent('text', opener)
-        opener_msg = Message(MessageRole.User, opener_content)
-        return cls(_id, item_type, [opener_msg], status)
+    def new(cls, _id: str, item_type: str, status=Status.NEW):
+        return cls(_id, item_type, [], status)
 
 
 class C3:
