@@ -15,7 +15,6 @@ else:
 if platform.system() == 'Windows':
     raise OSError("Windows Firefox webdriver not supported")
 else:
-    # FIREFOX_DATA_PATH = f"-profile {os.path.expanduser('~')}/snap/firefox/common/.mozilla/firefox/cd3jw6g1.default"
     FIREFOX_DATA_PATH = f"{os.path.expanduser('~')}/snap/firefox/common/.mozilla/firefox/cd3jw6g1.default"
     FIREFOX_BINARY_PATH = '/snap/firefox/4259/usr/lib/firefox/firefox'
 
