@@ -9,7 +9,7 @@ from offerup.c3 import C3, GRADES
 from offerup.config import PHONES
 
 # limit number of results that we actually display during testing
-LIMIT = 1000  # TODO load button
+LIMIT = 20  # TODO add a "load" button to paginate
 # Get the directory of the current script
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
