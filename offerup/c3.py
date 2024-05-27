@@ -1,9 +1,10 @@
 import dataclasses
 from enum import Enum
-from typing import Optional
+from typing import Optional, Self, Any
 from dataclasses import dataclass
 import json
 
+from azure.core.paging import ItemPaged
 from azure.cosmos import CosmosClient, DatabaseProxy, ContainerProxy, PartitionKey
 from azure.cosmos.exceptions import ResourceExistsError
 
@@ -48,7 +49,7 @@ class Convo:
     grade: Optional[str] = None
 
     @classmethod
-    def new(cls, _id: str, item_type: str, status=Status.NEW):
+    def new(cls, _id: str, item_type: str, status=Status.NEW) -> Self:
         return cls(_id, item_type, [], status)
 
 
@@ -63,7 +64,7 @@ class C3:
         self.partition_key = PartitionKey(path="/status")
         self.container: ContainerProxy = self.db.create_container_if_not_exists(container, self.partition_key)
 
-    def new(self, convo: Convo, skip_conflicts=True):
+    def new(self, convo: Convo, skip_conflicts=True) -> None:
         d3 = json.dumps(dataclasses.asdict(convo))
 
         try:
@@ -74,24 +75,29 @@ class C3:
             else:
                 raise e
 
-    def update(self, listing_id: str, partition='test', **kwargs):
+    def update(self, listing_id: str, partition='test', **kwargs) -> None:
         ops = []
         for k, v in kwargs.items():
             ops.append({'op': 'add', 'path': '/' + k, 'value': v})
         self.container.patch_item(item=listing_id, partition_key=partition, patch_operations=ops)
 
-    def print_convos(self):
+    def print_convos(self) -> None:
         for c in self.container.read_all_items():
             print(c)
 
-    def reset(self):
+    def reset(self) -> None:
         _id = self.container.id
         self.db.delete_container(_id)
         del self.container
         self.__init__(self.db.id, _id)
 
+    def get_ungraded(self, max_item_count=30) -> ItemPaged[dict[str, Any]]:
+        return self.container.query_items("SELECT * FROM c WHERE c.grade = null",
+                                          enable_cross_partition_query=True,
+                                          max_item_count=max_item_count)
+
 
 if __name__ == '__main__':
     c3 = C3('conversations', 'offerup')
-    c3.update('e628118b-aa72-3639-adef-a459f912763e', grade='C')
-    # c3.print_convos()
+    x = c3.get_ungraded(5)
+    print(list(x))
