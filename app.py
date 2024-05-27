@@ -1,5 +1,4 @@
 import os
-import random
 
 import streamlit as st
 import pandas as pd
@@ -44,29 +43,35 @@ if st.checkbox('`C3: conversations/offerup`'):
 
 
 def update_df():
-    listings_df = pd.DataFrame(columns=['id', 'title', 'price', 'description', 'photo_urls'])
+    listings_df = pd.DataFrame(columns=['id', 'title', 'price', 'description', 'item_type', 'photo_urls'])
     listing_details_list = []
-    for listing_id in data.id:
-        listing_details = fetch.get_listing_details(listing_id)["data"]["listing"]
-        listing_details_list.append({'id': listing_id,
+    phones_dict = {phone: i + 1 for i, phone in enumerate(PHONES)}
+    for index, row in data.iterrows():
+        listing_details = fetch.get_listing_details(row['id'])["data"]["listing"]
+        item_type = row['itemType']
+        item_index = phones_dict.get(item_type, None)
+        listing_details_list.append({'id': row['id'],
                                      'title': listing_details['title'],
                                      'price': listing_details['price'],
                                      'description': listing_details['description'],
+                                     'item_index': item_index,
                                      'photo_urls': [photo["detail"]["url"] for photo in listing_details["photos"]]})
+    # Convert the list of dictionaries to a DataFrame
     new_listings_df = pd.DataFrame(listing_details_list)
-    return pd.concat([listings_df, new_listings_df], ignore_index=True)
+    # Concatenate the new DataFrame with the existing DataFrame
+    listings_df = pd.concat([listings_df, new_listings_df], ignore_index=True)
+    return listings_df
 
 
 def init_session():
     if 'listings_df' not in st.session_state:
-        print("init")
         st.session_state.listings_df = update_df()
 
 
 # Dictionary to store selected values for each listing
 values = {}
 init_session()
-NUM_CONTAINERS = len(data)
+NUM_CONTAINERS = sum(pd.notna(item_index) for item_index in st.session_state.listings_df['item_index'])
 
 # Initializing session state for expander expansion
 if 'expand' not in st.session_state:
@@ -80,47 +85,60 @@ def _next(i):
         st.session_state.expand[i + 1] = True
 
 
-def _prev(i):
-    st.session_state.expand[i] = False
-    if i - 1 >= 0:
-        st.session_state.expand[i - 1] = True
-
-
 # Function to write listing details
-def write_listing(i):
+def write_listing(i, item_index, exp_count):
     listing = st.session_state.listings_df.iloc[i]  # Fetch the listing from the DataFrame
+    # Displaying listing title and price
     st.subheader(f'{listing["title"]}: ${listing["price"]}')
+    # Displaying listing description
     st.write(listing["description"])
+    # Displaying listing photos (assuming 'photo_url' is a URL to the photo)
     st.image(listing["photo_urls"])
-    val_item_type = st.radio("Device", ["bad device"] + PHONES, horizontal=True, key=f"ver_{i}", index=None)
-    val_grade = st.radio("Grade", GRADES, horizontal=True, key=f"grade_{i}", index=None)
+    val_item_type = st.radio("Device", ["bad device"] + PHONES, horizontal=True, key=f"ver_{i}", index=item_index)
+    val_grade = st.radio("Grade", GRADES, horizontal=True, key=f"grade_{i}", index=1)
+    # Creating columns for different options
     st.markdown("<div style='padding-bottom: 0.25rem; font-size: 14px;'>Damage</div>", unsafe_allow_html=True)
-    dmg_col1, dmg_col2, dmg_col3 = st.columns(3)
-    with dmg_col1:
-        val_back = st.checkbox("Cracked Back", key=f"back_{i}")
-    with dmg_col2:
-        val_cam = st.checkbox("Cracked Camera", key=f"cam_{i}")
-    with dmg_col3:
-        val_lcd = st.checkbox("LCD Damage", key=f"lcd_{i}")
-    prog_col1, prog_col2 = st.columns(2)
-    with prog_col1:
-        st.button("Previous", on_click=_prev, args=(i,), key=f"prev_{i}", use_container_width=True)
-    with prog_col2:
-        st.button("Next", on_click=_next, args=(i,), key=f"next_{i}", use_container_width=True)
-    results = {'grade': val_grade, 'back_dmg': val_back, 'cam_dmg': val_cam, 'lcd_dmg': val_lcd,
-               'itemType': val_item_type}
+    back_col, cam_col = st.columns(2)
+    with back_col:
+        with st.container(border=True):
+            val_back = st.checkbox("Cracked Back", key=f"back_{i}")
+    with cam_col:
+        with st.container(border=True):
+            val_cam = st.checkbox("Cracked Camera", key=f"cam_{i}")
+    bat_col, lock_col = st.columns(2)
+    with bat_col:
+        with st.container(border=True):
+            val_lcd = st.checkbox("Battery Damage", key=f"lcd_{i}")
+    with lock_col:
+        with st.container(border=True):
+            val_lock = st.checkbox("ICloud Lock", key=f"lock_{i}")
+    st.button("Next", on_click=_next, args=(exp_count,), key=f"next_{i}", use_container_width=True)
+    # Returning selected values as a dictionary
+    results = {
+        'grade': val_grade,
+        'back_dmg': val_back,
+        'cam_dmg': val_cam,
+        'bat_dmg': val_lcd,
+        'lock': val_lock,
+        'itemType': val_item_type,
+        'graded': True # TODO Either remove or pass to c3.update to filter out graded values
+    }
     return results
 
 
+exp_count = 0
 # Iterate over data to display expanders
 for idx in range(min(NUM_CONTAINERS, len(st.session_state.listings_df))):
-    print("ITER!", random.randint(0, 100))
-    with st.expander(f"Listing {st.session_state.listings_df.iloc[idx]['title']}  |  ID: {st.session_state.listings_df.iloc[idx]['id']}",
-                     expanded=st.session_state.expand[idx]):
-        values[st.session_state.listings_df.iloc[idx]['id']] = write_listing(idx)
+    item_index = st.session_state.listings_df.iloc[idx]['item_index']
+    if pd.notna(item_index):
+        item_index = int(item_index)
+        with st.expander(f"Listing {st.session_state.listings_df.iloc[idx]['title']}  |  ID: {st.session_state.listings_df.iloc[idx]['id']}",
+                         expanded=st.session_state.expand[exp_count]):
+            values[st.session_state.listings_df.iloc[idx]['id']] = write_listing(idx, item_index, exp_count)
+        exp_count += 1
 
 # Button to print selected values
-if st.button("Print Selected Grades", key="submit_button", use_container_width=True):
+if st.button("Save Changes", key="submit_button", use_container_width=True):
     for _id, listing_body in values.items():
         if listing_body['grade'] is not None:
             print(f"Grade selected for Listing ID {_id}: {listing_body}")
