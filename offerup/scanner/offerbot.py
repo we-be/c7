@@ -1,4 +1,5 @@
-from typing import Literal
+import time
+from typing import Literal, Callable
 
 from selenium import webdriver
 from selenium.common import NoSuchElementException
@@ -31,7 +32,8 @@ class OfferBot:
                 self.driver.get(listing["listingUrl"])
 
                 # Locate and click the 'Ask' button
-                self.ask()
+                # retry up to 3 times, sleeping a second inbetween
+                retry(self.ask, 3)
 
                 # wait until we see the chat modal or redirect to the inbox
                 # if the code fails here, we're probably not logged in
@@ -71,6 +73,25 @@ class OfferBot:
             all_listings[model] = fetch.get_listings(query=model, state=cfg.state, city=cfg.city,
                                                      limit=cfg.listing_limit)
         return all_listings
+
+
+# noinspection PyBroadException
+def retry(f: Callable, n: int, t=1, _i=0):
+    """
+    :params:
+    f: parameterless function to retry
+    n: number of times to retry before throwing
+    t: time to sleep (in seconds) between retries
+    _i: do not use this
+    """
+    try:
+        _i += 1
+        f()
+    except Exception as e:
+        if _i > n:
+            raise e
+        time.sleep(t)
+        retry(f, n, t, _i)
 
 
 def _init_webdriver(browser: Literal['chrome', 'firefox']):

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import json
 
 from azure.cosmos import CosmosClient, DatabaseProxy, ContainerProxy, PartitionKey
+from azure.cosmos.exceptions import ResourceExistsError
 
 from offerup.config import cfg
 
@@ -62,10 +63,16 @@ class C3:
         self.partition_key = PartitionKey(path="/status")
         self.container: ContainerProxy = self.db.create_container_if_not_exists(container, self.partition_key)
 
-    def new(self, convo: Convo):
-        # TODO except exceptions.CosmosResourceExistsError
+    def new(self, convo: Convo, skip_conflicts=True):
         d3 = json.dumps(dataclasses.asdict(convo))
-        self.container.create_item(json.loads(d3))
+
+        try:
+            self.container.create_item(json.loads(d3))
+        except ResourceExistsError as e:
+            if skip_conflicts:
+                print("Skipping conflict for ", convo.id)
+            else:
+                raise e
 
     def update(self, listing_id: str, partition='test', **kwargs):
         ops = []
