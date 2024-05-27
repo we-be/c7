@@ -26,7 +26,7 @@ c3 = C3('conversations', 'offerup')
 
 # Function to load data
 def load_data():
-    all_convos = c3.container.read_all_items()
+    all_convos = c3.get_ungraded(LIMIT)
     df = pd.DataFrame(all_convos)
     return df
 
@@ -121,7 +121,6 @@ def write_listing(i, item_index, exp_count):
         'bat_dmg': val_lcd,
         'lock': val_lock,
         'itemType': val_item_type,
-        'graded': True # TODO Either remove or pass to c3.update to filter out graded values
     }
     return results
 
