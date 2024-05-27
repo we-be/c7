@@ -43,7 +43,7 @@ def update_df():
     listings_df = pd.DataFrame(columns=['id', 'title', 'price', 'description', 'item_type', 'photo_urls'])
     listing_details_list = []
     phones_dict = {phone: i + 1 for i, phone in enumerate(PHONES)}
-    for row in data.iterrows():
+    for index, row in data.iterrows():
         listing_details = fetch.get_listing_details(row['id'])["data"]["listing"]
         item_type = row['itemType']
         item_index = phones_dict.get(item_type, None)
@@ -69,12 +69,13 @@ values = {}
 init_session()
 
 # Number of containers
-NUM_CONTAINERS = len(data)
-
+NUM_CONTAINERS = sum(pd.notna(item_index) for item_index in st.session_state.listings_df['item_index']) 
 
 # Initializing session state for expander expansion
 if 'expand' not in st.session_state:
     st.session_state.expand = [True] + [False] * (NUM_CONTAINERS - 1)
+
+print(st.session_state.expand)
 
 
 # Function to collapse the current expander and expand the next one
@@ -85,7 +86,7 @@ def _next(i):
 
 
 # Function to write listing details
-def write_listing(i, item_index):
+def write_listing(i, item_index, exp_count):
     listing = st.session_state.listings_df.iloc[i]  # Fetch the listing from the DataFrame
     # Displaying listing title and price
     st.subheader(f'{listing["title"]}: ${listing["price"]}')
@@ -111,7 +112,7 @@ def write_listing(i, item_index):
     with lock_col:
         with st.container(border=True):
             val_lock = st.checkbox("ICloud Lock", key=f"lock_{i}")
-    st.button("Next", on_click=_next, args=(i,), key=f"next_{i}", use_container_width=True)
+    st.button("Next", on_click=_next, args=(exp_count,), key=f"next_{i}", use_container_width=True)
     # Returning selected values as a dictionary
     results = {
         'grade': val_grade,
@@ -124,14 +125,16 @@ def write_listing(i, item_index):
     }
     return results
 
+exp_count = 0
 # Iterate over data to display expanders
 for idx in range(min(NUM_CONTAINERS, len(st.session_state.listings_df))):
     item_index = st.session_state.listings_df.iloc[idx]['item_index']
     if pd.notna(item_index):
         item_index = int(item_index)
         with st.expander(f"Listing {st.session_state.listings_df.iloc[idx]['title']}  |  ID: {st.session_state.listings_df.iloc[idx]['id']}",
-                        expanded=st.session_state.expand[idx]):
-            values[st.session_state.listings_df.iloc[idx]['id']] = write_listing(idx, item_index)
+                        expanded=st.session_state.expand[exp_count]):
+            values[st.session_state.listings_df.iloc[idx]['id']] = write_listing(idx, item_index, exp_count)
+        exp_count += 1
 
 # Button to print selected values
 if st.button("Save Changes", key="submit_button", use_container_width=True):
