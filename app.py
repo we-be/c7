@@ -10,7 +10,6 @@ from offerup.config import PHONES
 
 # limit number of results that we actually display during testing
 LIMIT = 20  # TODO add a "load" button to paginate
-# Get the directory of the current script
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # Displaying the logo
@@ -54,9 +53,7 @@ def update_df():
                                      'price': listing_details['price'],
                                      'description': listing_details['description'],
                                      'photo_urls': [photo["detail"]["url"] for photo in listing_details["photos"]]})
-    # Convert the list of dictionaries to a DataFrame
     new_listings_df = pd.DataFrame(listing_details_list)
-    # Concatenate the new DataFrame with the existing DataFrame
     return pd.concat([listings_df, new_listings_df], ignore_index=True)
 
 
@@ -68,10 +65,7 @@ def init_session():
 
 # Dictionary to store selected values for each listing
 values = {}
-
 init_session()
-
-# Number of containers
 NUM_CONTAINERS = len(data)
 
 # Initializing session state for expander expansion
@@ -82,8 +76,8 @@ if 'expand' not in st.session_state:
 # Function to collapse the current expander and expand the next one
 def _next(i):
     st.session_state.expand[i] = False
-    if i+1 < NUM_CONTAINERS:
-        st.session_state.expand[i+1] = True
+    if i + 1 < NUM_CONTAINERS:
+        st.session_state.expand[i + 1] = True
 
 
 def _prev(i):
@@ -95,15 +89,11 @@ def _prev(i):
 # Function to write listing details
 def write_listing(i):
     listing = st.session_state.listings_df.iloc[i]  # Fetch the listing from the DataFrame
-    # Displaying listing title and price
     st.subheader(f'{listing["title"]}: ${listing["price"]}')
-    # Displaying listing description
     st.write(listing["description"])
-    # Displaying listing photos (assuming 'photo_url' is a URL to the photo)
     st.image(listing["photo_urls"])
     val_item_type = st.radio("Device", ["bad device"] + PHONES, horizontal=True, key=f"ver_{i}", index=None)
     val_grade = st.radio("Grade", GRADES, horizontal=True, key=f"grade_{i}", index=None)
-    # Creating columns for different options
     st.markdown("<div style='padding-bottom: 0.25rem; font-size: 14px;'>Damage</div>", unsafe_allow_html=True)
     dmg_col1, dmg_col2, dmg_col3 = st.columns(3)
     with dmg_col1:
@@ -117,7 +107,6 @@ def write_listing(i):
         st.button("Previous", on_click=_prev, args=(i,), key=f"prev_{i}", use_container_width=True)
     with prog_col2:
         st.button("Next", on_click=_next, args=(i,), key=f"next_{i}", use_container_width=True)
-    # Returning selected values as a dictionary
     results = {'grade': val_grade, 'back_dmg': val_back, 'cam_dmg': val_cam, 'lcd_dmg': val_lcd,
                'itemType': val_item_type}
     return results
