@@ -1,8 +1,10 @@
 import dataclasses
 from enum import Enum
+from functools import cache
 from typing import Optional, Self, Any
 from dataclasses import dataclass
 import json
+import uuid
 
 from azure.core.paging import ItemPaged
 from azure.cosmos import CosmosClient, DatabaseProxy, ContainerProxy, PartitionKey
@@ -96,8 +98,23 @@ class C3:
                                           enable_cross_partition_query=True,
                                           max_item_count=max_item_count)
 
+    def graded(self, use_cache: bool | str = True) -> list[dict[str, Any]]:
+        if isinstance(use_cache, str):
+            refresh_token = use_cache
+        elif use_cache:
+            refresh_token = None
+        else:
+            refresh_token = str(uuid.uuid1())
+        return self._graded(refresh_token)
+
+    @cache
+    def _graded(self, refresh_token=None) -> list[dict[str, Any]]:
+        """refresh token """
+        res = self.container.query_items("SELECT * FROM c WHERE c.grade != null",
+                                         enable_cross_partition_query=True)
+        return list(res)
+
 
 if __name__ == '__main__':
-    c3 = C3('conversations', 'offerup')
-    x = c3.get_ungraded(5)
-    print(list(x))
+    x = C3('conversations', 'offerup').graded()
+    print(x)
