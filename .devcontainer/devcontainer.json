@@ -1,0 +1,11 @@
+{
+    "name": "c7",
+    "image": "mcr.microsoft.com/devcontainers/base:jammy",
+    "features": {
+      "ghcr.io/devcontainers/features/python:1": {"version": "3.12"},
+      "ghcr.io/devcontainers/features/github-cli:1": {},
+      "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+      "ghcr.io/devcontainers/features/azure-cli:1": {}
+    },
+    "postCreateCommand": "pip install -r requirements.txt"
+  }
