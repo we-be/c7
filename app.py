@@ -3,9 +3,11 @@ import os
 import streamlit as st
 import pandas as pd
 from pyOfferUp import fetch
+from azure.cosmos.exceptions import CosmosResourceNotFoundError
 
 from offerup.c3 import C3, GRADES
 from offerup.config import PHONES
+from offerup.colorize import cprint
 
 # limit number of results that we actually display during testing
 LIMIT = 20  # TODO add a "load" button to paginate
@@ -86,7 +88,7 @@ def _next(i):
 
 
 # Function to write listing details
-def write_listing(i, item_index, exp_count):
+def write_listing(i, item_index, _exp_count):
     listing = st.session_state.listings_df.iloc[i]  # Fetch the listing from the DataFrame
     # Displaying listing title and price
     st.subheader(f'{listing["title"]}: ${listing["price"]}')
@@ -112,7 +114,7 @@ def write_listing(i, item_index, exp_count):
     with lock_col:
         with st.container(border=True):
             val_lock = st.checkbox("ICloud Lock", key=f"lock_{i}")
-    st.button("Next", on_click=_next, args=(exp_count,), key=f"next_{i}", use_container_width=True)
+    st.button("Next", on_click=_next, args=(_exp_count,), key=f"next_{i}", use_container_width=True)
     # Returning selected values as a dictionary
     results = {
         'grade': val_grade,
@@ -141,5 +143,14 @@ if st.button("Save Changes", key="submit_button", use_container_width=True):
     for _id, listing_body in values.items():
         if listing_body['grade'] is not None:
             print(f"Grade selected for Listing ID {_id}: {listing_body}")
-            c3.update(_id, **listing_body)
+
+            # we wrap the call to update the db in try-except here
+            # because somehow when Ed saves it tries to update some resources that don't exist
+            # but... we don't want to prevent the app from completely saving
+            # ideally we want to triage this at some point in the future
+            try:
+                c3.update(_id, **listing_body)
+            except CosmosResourceNotFoundError as e:
+                cprint('red', f'COULD NOT UPDATE LISTING {_id}: {e}')
+
     st.session_state.listings_df = update_df()
