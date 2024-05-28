@@ -99,20 +99,19 @@ class C3:
                                           max_item_count=max_item_count)
 
     def graded(self, use_cache: bool | str = True) -> list[dict[str, Any]]:
+        @cache
+        def _graded(_self, _refresh_token=None) -> list[dict[str, Any]]:
+            res = _self.container.query_items("SELECT * FROM c WHERE c.grade != null",
+                                              enable_cross_partition_query=True)
+            return list(res)
+
         if isinstance(use_cache, str):
             refresh_token = use_cache
         elif use_cache:
             refresh_token = None
         else:
             refresh_token = str(uuid.uuid1())
-        return self._graded(refresh_token)
-
-    @cache
-    def _graded(self, refresh_token=None) -> list[dict[str, Any]]:
-        """refresh token """
-        res = self.container.query_items("SELECT * FROM c WHERE c.grade != null",
-                                         enable_cross_partition_query=True)
-        return list(res)
+        return _graded(self, refresh_token)
 
 
 if __name__ == '__main__':
