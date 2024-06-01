@@ -77,11 +77,11 @@ class C3:
             else:
                 raise e
 
-    def update(self, listing_id: str, partition='test', **kwargs) -> None:
+    def update(self, listing_id: str, status: str, **kwargs) -> None:
         ops = []
         for k, v in kwargs.items():
             ops.append({'op': 'add', 'path': '/' + k, 'value': v})
-        self.container.patch_item(item=listing_id, partition_key=partition, patch_operations=ops)
+        self.container.patch_item(item=listing_id, partition_key=status, patch_operations=ops)
 
     def print_convos(self) -> None:
         for c in self.container.read_all_items():
@@ -115,5 +115,7 @@ class C3:
 
 
 if __name__ == '__main__':
-    x = C3('conversations', 'offerup').graded()
-    print(x)
+    c3 = C3('conversations', 'offerup')
+    listing = next(c3.get_ungraded(1))
+    __id = listing.pop('id')
+    c3.update(__id, status='new', grade='A')
