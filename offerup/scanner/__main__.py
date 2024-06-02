@@ -6,3 +6,4 @@ from offerup.scanner.offerbot import OfferBot
 if __name__ == '__main__':
     bot = OfferBot('chrome')
     bot.scan()
+    bot.driver.close()
