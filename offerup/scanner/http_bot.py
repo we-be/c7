@@ -30,4 +30,4 @@ class GraphQLBot(Bot):
 
 if __name__ == "__main__":
     bot = GraphQLBot()
-    bot.search('iphone 15')
+    bot.get_listings()

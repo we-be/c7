@@ -68,14 +68,6 @@ class SeleniumBot(Bot):
         else:
             raise NoSuchElementException("Could not find ask button.")
 
-    @staticmethod
-    def get_listings() -> dict[str, list[dict]]:
-        all_listings = {}
-        for model in cfg.valid_iphone_models:
-            all_listings[model] = fetch.get_listings(query=model, state=cfg.state, city=cfg.city,
-                                                     limit=cfg.listing_limit)
-        return all_listings
-
 
 # noinspection PyBroadException
 def retry(f: Callable, n: int, t=1, _i=0):
