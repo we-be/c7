@@ -5,6 +5,7 @@ import platform
 
 from dotenv import load_dotenv
 
+
 PHONES = list(reversed(["iphone 11", "iphone 12", "iphone 13", "iphone 14", "iphone 15"]))
 
 if platform.system() == 'Windows':

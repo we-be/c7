@@ -5,7 +5,7 @@ import pandas as pd
 from pyOfferUp import fetch
 from azure.cosmos.exceptions import CosmosResourceNotFoundError
 
-from offerup.c3 import C3, GRADES
+from c3 import C3, GRADES
 from offerup.config import PHONES
 from offerup.colorize import cprint
 

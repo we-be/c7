@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from pyOfferUp import fetch
 
-from offerup.c3 import C3, Convo, Status
+from c3 import C3, Convo, Status
 from offerup.config import cfg
 
 CHAT_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/div/div/div[2]/div/textarea'
