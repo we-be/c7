@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from pyOfferUp import fetch
 
+from offerup.scanner.bot import Bot
 from c3 import C3, Convo, Status
 from offerup.config import cfg
 
@@ -18,7 +19,7 @@ NEW_MSG_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/div/div/div[2]/div/tex
 SEND_MSG_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/button'
 
 
-class SeleniumBot:
+class SeleniumBot(Bot):
     """Ask questions and make offers"""
     def __init__(self, browser: Literal['chrome', 'firefox']):
         self.driver = _init_webdriver(browser)
