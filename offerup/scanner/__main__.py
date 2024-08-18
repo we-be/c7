@@ -1,9 +1,9 @@
-from offerup.scanner.offerbot import OfferBot
+from offerup.scanner.selenium_bot import SeleniumBot
 
 # NOTE
 # Most object use the `Config` instantiated at the bottom of config.py
 
 if __name__ == '__main__':
-    bot = OfferBot('chrome')
+    bot = SeleniumBot('chrome')
     bot.scan()
     bot.driver.close()

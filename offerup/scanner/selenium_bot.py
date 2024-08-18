@@ -18,7 +18,7 @@ NEW_MSG_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/div/div/div[2]/div/tex
 SEND_MSG_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/button'
 
 
-class OfferBot:
+class SeleniumBot:
     """Ask questions and make offers"""
     def __init__(self, browser: Literal['chrome', 'firefox']):
         self.driver = _init_webdriver(browser)
@@ -110,6 +110,6 @@ def _init_webdriver(browser: Literal['chrome', 'firefox']):
 
 
 if __name__ == '__main__':
-    bot = OfferBot('chrome')
+    bot = SeleniumBot('chrome')
     bot.scan()
     bot.driver.quit()
