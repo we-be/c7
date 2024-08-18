@@ -14,6 +14,7 @@ from offerup.scanner.bot import Bot
 from c3 import C3, Convo, Status
 from offerup.config import cfg
 
+
 CHAT_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/div/div/div[2]/div/textarea'
 NEW_MSG_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/div/div/div[2]/div/textarea'
 SEND_MSG_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/button'
