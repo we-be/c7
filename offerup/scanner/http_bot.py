@@ -12,7 +12,7 @@ from offerup.config import cfg, PHONES
 from c3 import C3, Convo, Status
 
 
-TEMP_QUERY = 'iphone 15'
+TEMP_QUERY = 'iphone 15'  # will remove this when done testing
 TEMP_NUM_LISTINGS = 1  # will remove this when done testing
 
 
@@ -36,8 +36,13 @@ class GraphQLBot(Bot):
             
             # start the conversation
             print('nothing yet stored for', listing_id, 'initiating convo...')
-            resp = self.get_listing_by_id(listing_id)
-            _id = resp['data']['listing']['id']  # this is an integer, different than `listingId`
+            # resp = self.get_listing_by_id(listing_id)
+            # _id = resp['data']['listing']['id']  # this is an integer, different than `listingId`
+            
+            # save the convo with c3
+            convo = Convo.new(listing["listingId"], TEMP_QUERY, Status.NEW)
+            self.c3.new(convo)
+            print(f'saved listing {listing_id}')
     
     def login(self) -> bool:
         """returns a boolean to indicate of the login was successful"""
@@ -164,4 +169,4 @@ class GraphQLBot(Bot):
 
 if __name__ == "__main__":
     bot = GraphQLBot()
-    p = bot.get_price('iphone 15'); print(p)
+    p = bot.scan()
