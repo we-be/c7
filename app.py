@@ -98,7 +98,7 @@ def write_listing(i, item_index, _exp_count):
     st.image(listing["photo_urls"])
     val_item_type = st.radio("Device", ["bad device"] + PHONES, horizontal=True, key=f"ver_{i}", index=item_index)
     val_grade = st.radio("Grade", GRADES, horizontal=True, key=f"grade_{i}", index=1)
-    val_model = st.radio("Model", MODELS, horizontal=True, key=f"model_{i}", index=1)
+    val_size = st.radio("Size/Pro", SIZES, horizontal=True, key=f"size_{i}", index=1)
     
     # Creating columns for different options
     st.markdown("<div style='padding-bottom: 0.25rem; font-size: 14px;'>Damage</div>", unsafe_allow_html=True)
