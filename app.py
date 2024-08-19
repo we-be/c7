@@ -123,7 +123,7 @@ def write_listing(i, item_index, _exp_count):
         'bat_dmg': val_lcd,
         'lock': val_lock,
         'itemType': val_item_type,
-        'status': Status.GRADED.value
+        'status': Status.NEW.value
     }
     return results
 
@@ -150,7 +150,7 @@ if st.button("Save Changes", key="submit_button", use_container_width=True):
             # but... we don't want to prevent the app from completely saving
             # ideally we want to triage this at some point in the future
             try:
-                c3.update(_id, **listing_body)
+                c3.update(listing_id=_id, **listing_body)
             except CosmosResourceNotFoundError as e:
                 cprint('red', f'COULD NOT UPDATE LISTING {_id}: {e}')
 
