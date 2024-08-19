@@ -98,6 +98,8 @@ def write_listing(i, item_index, _exp_count):
     st.image(listing["photo_urls"])
     val_item_type = st.radio("Device", ["bad device"] + PHONES, horizontal=True, key=f"ver_{i}", index=item_index)
     val_grade = st.radio("Grade", GRADES, horizontal=True, key=f"grade_{i}", index=1)
+    val_size = st.radio("Size/Pro", SIZES, horizontal=True, key=f"size_{i}", index=1)
+    
     # Creating columns for different options
     st.markdown("<div style='padding-bottom: 0.25rem; font-size: 14px;'>Damage</div>", unsafe_allow_html=True)
     back_col, cam_col = st.columns(2)
@@ -114,6 +116,7 @@ def write_listing(i, item_index, _exp_count):
     with lock_col:
         with st.container(border=True):
             val_lock = st.checkbox("ICloud Lock", key=f"lock_{i}")
+    
     st.button("Next", on_click=_next, args=(_exp_count,), key=f"next_{i}", use_container_width=True)
     # Returning selected values as a dictionary
     results = {
