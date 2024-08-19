@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 
 PHONES = list(reversed(["iphone 11", "iphone 12", "iphone 13", "iphone 14", "iphone 15"]))
-MODELS = list(reversed(["Pro", "ProMax", "Reg", "Plus", ""]))
+SIZES = list(reversed(["Pro", "ProMax", "Reg", "Plus", ""]))
 if platform.system() == 'Windows':
     CHROME_DATA_PATH = f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data"
 else:
@@ -26,8 +26,9 @@ class Config:
     loaded = False  # dotenv loaded
 
     valid_iphone_models: list[str]
+    valid_sizes: list2[str]
     location: tuple[str, str]
-    listing_limit: int
+    listing_limit: intq
 
     chrome_data_path = CHROME_DATA_PATH
     firefox_data_path = FIREFOX_DATA_PATH
@@ -52,7 +53,7 @@ class Config:
     def _default(cls) -> Self:
         return cls(
             valid_iphone_models=PHONES,
-            valid_iphone_size=MODELS,
+            valid_iphone_size=SIZE,
             location=("Atlanta", "Georgia"),
             listing_limit=30,
         )
