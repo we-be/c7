@@ -18,6 +18,7 @@ class MessageRole(str, Enum):
     Assistant = "Assistant"
 
 
+# Status is the current partition key in our Cosmos DB which makes it tricky to change, thus everything is `new` rn
 class Status(str, Enum):
     ACTIVE = "active"  # active conversation, they have responded at least once and we are awaiting response
     PENDING = "pending"  # active conversation, the seller was the last one to respond
@@ -73,7 +74,7 @@ class C3:
     
     def get_with_status(self, item_id: str, status: Status) -> dict[str, Any]:
         try:
-            return self.container.read_item(item=item_id, partition_key=Status.value)
+            return self.container.read_item(item=item_id, partition_key=status.value)
         except CosmosResourceNotFoundError:
             raise KeyError(f"Item with id '{item_id}' not found in Cosmos")
         

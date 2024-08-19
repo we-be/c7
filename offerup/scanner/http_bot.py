@@ -13,7 +13,8 @@ from c3 import C3, Convo, Status
 
 
 TEMP_QUERY = 'iphone 15'  # will remove this when done testing
-TEMP_NUM_LISTINGS = 10  # will remove this when done testing
+TEMP_NUM_LISTINGS = 12  # will remove this when done testing
+TEMP_PRICE_OFFSET = 150
 
 
 class GraphQLBot(Bot):
@@ -29,21 +30,32 @@ class GraphQLBot(Bot):
             
             # check to see if we already have an entry for this device
             listing_id = listing['listingId']
-            status = self.c3.get_status(listing_id)
             stored_listing = self.c3.get(listing_id)
             if stored_listing:
-                print('we already have an entry for this phone, will implement message logic here')
-                continue
+                if not stored_listing['grade'] or stored_listing['itemType'] == 'bad device':  # skip ungraded or bd
+                    continue
+                
+                if not stored_listing['messages']: # start conversation
+                    # get other id
+                    _id = fetch.get_listing_details(listing_id)['data']['listing']['id']
+                    
+                    # determine price
+                    # price = self.get_price(
+                    #     model=stored_listing['itemType'],
+                    #     unlocked=not stored_listing['lock'],
+                    #     grade=stored_listing['grade'],
+                    #     )
+                    # print(stored_listing['itemType'], stored_listing['grade'], price)
+                    
+                    # make initial offer or ask question if needed
+                    msg = "is your phone locked to a carrier and is the icloud removed?"
+                    self.start_chat(_id, msg)
             
-            # start the conversation
-            print('nothing yet stored for', listing_id, 'initiating convo...')
-            # resp = self.get_listing_by_id(listing_id)
-            # _id = resp['data']['listing']['id']  # this is an integer, different than `listingId`
-            
-            # save the convo with c3
-            convo = Convo.new(listing["listingId"], TEMP_QUERY, Status.NEW)
-            self.c3.new(convo)
-            print(f'saved listing {listing_id}')
+            else:
+                # save the listing with c3 to be graded
+                convo = Convo.new(listing["listingId"], TEMP_QUERY, Status.NEW)
+                self.c3.new(convo)
+                print(f'saved listing {listing_id}')
     
     def login(self) -> bool:
         """returns a boolean to indicate of the login was successful"""
@@ -134,7 +146,7 @@ class GraphQLBot(Bot):
                 print("Unexpected response structure:", data)
                 return None
         except requests.RequestException as e:
-            print(f"Error starting chat: {e}")
+            print(f"Error starting chat: {e}\n{response.text}")
             return None
         
     def get_price(self, model: Literal['iphone 15', 'iphone 14', 'iphone 13', 'iphone 12', 'iphone 11', 'iphone x', 'iphone xs', 'iphone xr'],
@@ -161,9 +173,9 @@ class GraphQLBot(Bot):
         try:
             response = requests.get(url)
             response.raise_for_status()
-            return float(response.text[1:]) - 100  # response includes dollar sign, like "$490"
+            return float(response.text[1:]) - TEMP_PRICE_OFFSET  # response includes dollar sign, like "$490"
         except requests.RequestException as e:
-            print(f"Error fetching price: {e}")
+            print(f"Error fetching price: {e}\n{response.text}")
             return None
 
 
