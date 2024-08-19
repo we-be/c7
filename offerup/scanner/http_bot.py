@@ -21,14 +21,6 @@ class GraphQLBot(Bot):
     def login(self) -> bool:
         """returns a boolean to indicate of the login was successful"""
         pass
-    
-    def search(self, search_term: str):
-        resp = requests.get(cfg.offerup_url + f'/search?q={search_term.replace(' ', '+')}', 
-                            headers=self.headers.to_dict())
-        with open('output.html', 'w', encoding='utf-8') as f:
-            f.write(resp.text)
-        print(f'got {resp.status_code}')
-        print(f'Response content written to output.html')
 
     def get_listing_by_id(self, listing_id: str):
         headers = self.headers.to_dict()
