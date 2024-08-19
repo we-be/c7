@@ -13,7 +13,7 @@ from c3 import C3, Convo, Status
 
 
 TEMP_QUERY = 'iphone 15'  # will remove this when done testing
-TEMP_NUM_LISTINGS = 1  # will remove this when done testing
+TEMP_NUM_LISTINGS = 10  # will remove this when done testing
 
 
 class GraphQLBot(Bot):
@@ -29,6 +29,7 @@ class GraphQLBot(Bot):
             
             # check to see if we already have an entry for this device
             listing_id = listing['listingId']
+            status = self.c3.get_status(listing_id)
             stored_listing = self.c3.get(listing_id)
             if stored_listing:
                 print('we already have an entry for this phone, will implement message logic here')

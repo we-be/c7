@@ -21,7 +21,8 @@ class MessageRole(str, Enum):
 class Status(str, Enum):
     ACTIVE = "active"  # active conversation, they have responded at least once and we are awaiting response
     PENDING = "pending"  # active conversation, the seller was the last one to respond
-    NEW = "new"  # We have messages the customer but have not received a response yet
+    NEW = "new"  # the listing has been scraped but needs to be graded
+    GRADED = "graded"  # the device has been graded and we need to send an initial message
     TEST = "test"  # We saved the message as for testing purposes, but likely didn't actually send anything
     STALE = "stale"  # Have not received a response from the customer in some time
     HI = "human intervention"  # needs triage by an authorized human being
@@ -67,18 +68,23 @@ class C3:
         self.container: ContainerProxy = self.db.create_container_if_not_exists(container, self.partition_key)
         
     def __getitem__(self, item_id: str) -> dict[str, Any]:
+        status = self.get_status(item_id)
+        return self.get_with_status(item_id, status)
+    
+    def get_with_status(self, item_id: str, status: Status) -> dict[str, Any]:
         try:
-            # We need to query to get the status (partition key) first
-            query = f"SELECT c.status FROM c WHERE c.id = '{item_id}'"
-            results = list(self.container.query_items(query, enable_cross_partition_query=True))
-            
-            if not results:
-                raise KeyError(f"Item with id '{item_id}' not found")
-            
-            status = results[0]['status']
-            return self.container.read_item(item=item_id, partition_key=status)
+            return self.container.read_item(item=item_id, partition_key=Status.value)
         except CosmosResourceNotFoundError:
-            raise KeyError(f"Item with id '{item_id}' not found")
+            raise KeyError(f"Item with id '{item_id}' not found in Cosmos")
+        
+    def get_status(self, item_id: str) -> Status:
+        query = f"SELECT c.status FROM c WHERE c.id = '{item_id}'"
+        results = list(self.container.query_items(query, enable_cross_partition_query=True))
+        
+        if not results:
+            raise KeyError(f"Item with id '{item_id}' not found in Cosmos")
+        
+        return Status(results[0]['status'])
 
     def get(self, item_id: str, default: Any = None) -> Optional[dict[str, Any]]:
         try:

@@ -5,7 +5,7 @@ import pandas as pd
 from pyOfferUp import fetch
 from azure.cosmos.exceptions import CosmosResourceNotFoundError
 
-from c3 import C3, GRADES
+from c3 import C3, GRADES, Status
 from offerup.config import PHONES
 from offerup.colorize import cprint
 
@@ -123,7 +123,7 @@ def write_listing(i, item_index, _exp_count):
         'bat_dmg': val_lcd,
         'lock': val_lock,
         'itemType': val_item_type,
-        'status': 'new'  # partition key, has to be set to 'new', requires a fix in Cosmos
+        'status': Status.GRADED.value
     }
     return results
 
