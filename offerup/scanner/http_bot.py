@@ -6,6 +6,7 @@ from offerup.scanner.headers import HTTPHeaders
 from c3 import C3, Convo, Status
 from offerup.config import cfg
 
+
 class GraphQLBot(Bot):
     def __init__(self):
         self.c3 = C3('conversations', 'offerup')  # cosmos conversation container
@@ -27,6 +28,7 @@ class GraphQLBot(Bot):
             f.write(resp.text)  # write response to file
         print(f'got {resp.status_code}')
         print(f'Response content written to output.html')
+
 
 if __name__ == "__main__":
     bot = GraphQLBot()
