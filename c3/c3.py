@@ -8,7 +8,7 @@ import uuid
 
 from azure.core.paging import ItemPaged
 from azure.cosmos import CosmosClient, DatabaseProxy, ContainerProxy, PartitionKey
-from azure.cosmos.exceptions import ResourceExistsError
+from azure.cosmos.exceptions import ResourceExistsError, CosmosResourceNotFoundError
 
 from offerup.config import cfg
 
@@ -65,6 +65,26 @@ class C3:
         self.db: DatabaseProxy = self.client.get_database_client(db)
         self.partition_key = PartitionKey(path="/status")
         self.container: ContainerProxy = self.db.create_container_if_not_exists(container, self.partition_key)
+        
+    def __getitem__(self, item_id: str) -> dict[str, Any]:
+        try:
+            # We need to query to get the status (partition key) first
+            query = f"SELECT c.status FROM c WHERE c.id = '{item_id}'"
+            results = list(self.container.query_items(query, enable_cross_partition_query=True))
+            
+            if not results:
+                raise KeyError(f"Item with id '{item_id}' not found")
+            
+            status = results[0]['status']
+            return self.container.read_item(item=item_id, partition_key=status)
+        except CosmosResourceNotFoundError:
+            raise KeyError(f"Item with id '{item_id}' not found")
+
+    def get(self, item_id: str, default: Any = None) -> Optional[dict[str, Any]]:
+        try:
+            return self[item_id]
+        except KeyError:
+            return default
 
     def new(self, convo: Convo, skip_conflicts=True) -> None:
         d3 = json.dumps(dataclasses.asdict(convo))

@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 
 
 PHONES = list(reversed(["iphone 11", "iphone 12", "iphone 13", "iphone 14", "iphone 15"]))
-OFFERUP_URL = 'https://offerup.com/'
 
 if platform.system() == 'Windows':
     CHROME_DATA_PATH = f"user-data-dir={os.path.expanduser('~')}\\AppData\\Local\\Google\\Chrome\\User Data"
@@ -33,7 +32,6 @@ class Config:
     chrome_data_path = CHROME_DATA_PATH
     firefox_data_path = FIREFOX_DATA_PATH
     firefox_binary_path = FIREFOX_BINARY_PATH
-    offerup_url = OFFERUP_URL
 
     @classmethod
     def default(cls, load=True, debug=False, **kwargs) -> Self:
