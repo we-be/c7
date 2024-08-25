@@ -1,5 +1,4 @@
-import time
-from typing import Literal, Callable
+from typing import Literal
 
 from selenium import webdriver
 from selenium.common import NoSuchElementException
@@ -12,6 +11,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from offerup.scanner.bot import Bot
 from c3 import C3, Convo, Status
 from offerup.config import cfg
+from offerup.utils import retry
 
 
 CHAT_XPATH = '/html/body/div[4]/div[3]/div/div[3]/form/div/div/div[2]/div/textarea'
@@ -66,25 +66,6 @@ class SeleniumBot(Bot):
                 return button.click()
         else:
             raise NoSuchElementException("Could not find ask button.")
-
-
-# noinspection PyBroadException
-def retry(f: Callable, n: int, t=1, _i=0):
-    """
-    :params:
-    f: parameterless function to retry
-    n: number of times to retry before throwing
-    t: time to sleep (in seconds) between retries
-    _i: do not use this
-    """
-    try:
-        _i += 1
-        f()
-    except Exception as e:
-        if _i > n:
-            raise e
-        time.sleep(t)
-        retry(f, n, t, _i)
 
 
 def _init_webdriver(browser: Literal['chrome', 'firefox']):
