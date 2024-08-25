@@ -1,4 +1,3 @@
-import json
 from typing import Optional, Literal
 from urllib.parse import urlencode
 
@@ -135,24 +134,24 @@ class GraphQLBot(Bot):
             """
         }
 
-        try:
-            response = requests.post(self.graphql_url, headers=headers, json=payload)
-            response.raise_for_status()  # Raises an HTTPError for bad responses
-            
-            data = response.json()
-            if 'data' in data and 'postFirstMessage' in data['data']:
-                return data['data']['postFirstMessage']['id']
-            else:
-                print("Unexpected response structure:", data)
-                return None
-        except requests.RequestException as e:
-            print(f"Error starting chat: {e}\n{response.text}")
-            return None
+        response = requests.post(self.graphql_url, headers=headers, json=payload)
+        if response.status_code == 403:
+            print('got 403, need to log in...')
+            return
+        response.raise_for_status()
         
+        data = response.json()
+        if 'data' in data and 'postFirstMessage' in data['data']:
+            return data['data']['postFirstMessage']['id']
+        else:
+            print("Unexpected response structure:", data)
+            return None
+
+
     def get_price(self, model: Literal['iphone 15', 'iphone 14', 'iphone 13', 'iphone 12', 'iphone 11', 'iphone x', 'iphone xs', 'iphone xr'],
                 unlocked: bool = True,
                 grade: Literal['swap', 'a', 'b', 'c', 'd', 'doa'] = 'b',
-                storage: Literal['64gb', '128gb', '256gb', '512gb'] = '128gb') -> Optional[float]:
+                storage: Literal['64gb', '128gb', '256gb', '512gb'] = '128gb') -> float:
         """
         Get the price for a specific iPhone model using the pricing API.
         
@@ -169,15 +168,9 @@ class GraphQLBot(Bot):
         }
         
         url = f"{cfg['PRICING_API_URL']}/api/iphone-used/{model}?{urlencode(params)}"
-        
-        try:
-            response = requests.get(url)
-            response.raise_for_status()
-            return float(response.text[1:]) - TEMP_PRICE_OFFSET  # response includes dollar sign, like "$490"
-        except requests.RequestException as e:
-            print(f"Error fetching price: {e}\n{response.text}")
-            return None
-
+        response = requests.get(url)
+        response.raise_for_status()
+        return float(response.text[1:]) - TEMP_PRICE_OFFSET  # response includes dollar sign, like "$490"
 
 
 if __name__ == "__main__":

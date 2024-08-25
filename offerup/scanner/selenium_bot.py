@@ -8,7 +8,6 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
-from pyOfferUp import fetch
 
 from offerup.scanner.bot import Bot
 from c3 import C3, Convo, Status
