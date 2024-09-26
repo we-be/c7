@@ -50,8 +50,8 @@ class HTTPHeaders:
         """
         headers_json = redis_client.get(key)
         if headers_json is None:
-            example_headers = '{"some": "donkus"}'
-            redis_client.set('offerup', example_headers)
+            headers_json = '{"some": "donkus"}'
+            redis_client.set('offerup', headers_json)
             # raise KeyError(f"No headers found in Redis with key: {key}")
         
         headers_dict = json.loads(headers_json)
