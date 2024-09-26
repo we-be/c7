@@ -50,7 +50,9 @@ class HTTPHeaders:
         """
         headers_json = redis_client.get(key)
         if headers_json is None:
-            raise KeyError(f"No headers found in Redis with key: {key}")
+            example_headers = '{"some": "donkus"}'
+            redis_client.set('offerup', example_headers)
+            # raise KeyError(f"No headers found in Redis with key: {key}")
         
         headers_dict = json.loads(headers_json)
         field_names = {f.name for f in fields(cls)}
